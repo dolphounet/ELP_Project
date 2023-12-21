@@ -13,9 +13,9 @@ Our objective is to make a Canny filter by following these steps :
 4. Calculate the gradiant matrix of the image
 5. Suppressing the non maximum values
 6. Apply a countouring filter via a threshold
-   6.1. Pixels under the lower threshold does not pass the filter
-   6.2. Pixels over the high threshold pass the filter 
-   6.3. Pixels in-between pass only if they are adjascent to already passed pixels
+6.1. Pixels under the lower threshold does not pass the filter
+6.2. Pixels over the high threshold pass the filter 
+6.3. Pixels in-between pass only if they are adjascent to already passed pixels
 
 # Libraries
 
