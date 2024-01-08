@@ -11,9 +11,17 @@ import (
 	"os"
 )
 
+// on peut renvoyer des fichiers png et jpeg mais seulement ouvrir et décoder du png
 func main() {
+
+	//à modifier pour importer l'image choisie !!
+
+	const imagefournie string = "C:/testsGO/wall_anime_8K"
+	var format string = ".png"
+
 	// Ouvrir le fichier image
-	imageFile, err := os.Open("C:/testsGO/oeuvre.png")
+	imageFile, err := os.Open(imagefournie + format)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,13 +60,14 @@ func main() {
 	fmt.Printf("Valeur de niveau de gris du 6ième pixel : %v\n", grayMatrix[6][0])
 
 	// Affichage de la matrice des niveaux de gris
-	for y := 0; y < height; y++ {
+	/*for y := 0; y < height; y++ {
 		fmt.Printf("\n")
 		for x := 0; x < width; x++ {
 			fmt.Printf(" %v", grayMatrix[y][x])
 
 		}
 	}
+	*/
 
 	//création d'une nouvelle image png en niveaux de gris
 	grayImage := image.NewGray(image.Rect(0, 0, width, height))
@@ -73,7 +82,8 @@ func main() {
 	}
 
 	// Création d'un fichier image PNG
-	file, err := os.Create("nouvelle_image.png")
+
+	file, err := os.Create(imagefournie + "niveauGris" + format)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,5 +94,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Fichier PNG créé avec succès.")
+	fmt.Printf("Fichier %s créé avec succès.", format)
 }
