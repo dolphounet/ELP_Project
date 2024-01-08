@@ -7,8 +7,8 @@ Membres :
 # Objective
 Our objective is to make a Canny filter by following these steps :
 
-1. Read the image
-2. Apply grayscale using the : 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue formula per pixel.
+1. Read the image - *Stored into a matrix of [Red,Green,Blue] lists, being the RGB values of each pixel.*
+2. Apply grayscale using the : 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue formula per pixel. - *Grayscaled values stored in a new matrix of int*
 3. Apply gaussian filter on the image
 4. Calculate the gradiant matrix of the image
 5. Suppressing the non maximum values
