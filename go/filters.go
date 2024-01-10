@@ -29,7 +29,27 @@ func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	return filter
 }
 
-func main()  {
-  filter := generateGaussianFilter(5, float64(2))
+func convolve(img [][]float64, kernel [][]float64) [][]float64{
+	width := len(img[0])
+	height := len(img)
+  result := make([][]float64, height)
+  for y := 0; y<height; y++{
+    result[y] = make([]float64, width)
+    for x := 0; x<width; x++{
+      sum := float64(0)
+      for i := 0; i<len(kernel); i++{
+        for j := 0; j<len(kernel); j++{
+          if x + i - len(kernel)/2 >= 0 && y + j - len(kernel)/2 >= 0 && x+i -len(kernel)/2 < width && y+j-len(kernel)/2<height{
+            sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2]*kernel[i][j]
+          }
+        }
+      }
+      result[y][x] = sum
+    }
+  }
+  return result
+}
 
+func main()  {
+  //filter := generateGaussianFilter(5, float64(2))
 }
