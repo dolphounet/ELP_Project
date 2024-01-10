@@ -50,6 +50,39 @@ func convolve(img [][]float64, kernel [][]float64) [][]float64{
   return result
 }
 
+func sobel(img [][]float64) ([][]float64, float64){
+   x_sobel := [][]float64 {
+    {1, 0, -1},
+    {2, 0, -2},
+    {1, 0, -1},
+  }
+  y_sobel := [][]float64 {
+    {1, 2, 1},
+    {0, 0, 0},
+    {-1, -2, 1},
+  }
+  width := len(img[0])
+	height := len(img)
+  sumX := convolve(img, x_sobel)
+  sumY := convolve(img, y_sobel)
+  max_value := float64(0)
+  result := make([][]float64, height)
+  for y := 0; y<height; y++{
+    result[y] = make([]float64, width)
+    for x := 0; x< width; x++{
+      valX := sumX[y][x]
+      valY := sumY[y][x]
+      gradiant := float64(math.Sqrt(valX*valX + valY*valY))
+      if gradiant > max_value {
+        max_value = gradiant
+      }
+      result[y][x] = gradiant
+    } 
+  }
+  return result, max_value
+}
+
 func main()  {
-  //filter := generateGaussianFilter(5, float64(2))
+  
+
 }
