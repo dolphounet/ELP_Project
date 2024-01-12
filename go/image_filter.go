@@ -1,7 +1,6 @@
 package main
 
 import (
-  "fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -59,7 +58,7 @@ func convolve(img [][]float64, kernel [][]float64) [][]float64{
   return result
 }
 
-func sobel(img [][]float64) ([][]float64, float64){
+func sobel(img [][]float64) [][]float64{
    x_sobel := [][]float64 {
     {1, 0, -1},
     {2, 0, -2},
@@ -100,24 +99,23 @@ func sobel(img [][]float64) ([][]float64, float64){
 }
 
 func suppressNonMax(matrix [][]float64, height int, width int) {
-	const tolerance float64 = 0.85
+	const tolerance float64 = 0.90
 
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
-			if matrix[i][j] < (max - tolerance) {
+			if matrix[i][j] < (1 - tolerance) {
 				matrix[i][j] = 0
 			}else{
         matrix[i][j] = 255
       }
-      
 		}
 	}
 }
 
 func contouring(matrix [][]float64, height int, width int) {
 
-	const lowerThreshold float64 = 0.1
-	const highThreshold float64 = 0.5
+	const lowerThreshold float64 = 0.3
+	const highThreshold float64 = 0.4
 
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
@@ -233,14 +231,14 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 
 func main() {
 	
-	img := read_img("/home/maxence/Documents/certes.png")
+	img := read_img("/home/maxence/Documents/valve.PNG")
   imgGray := rgb_to_grayscale(img)
   bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 
 	write_img("/home/maxence/grayed.png",imgGray)
 
-	kernel := generateGaussianFilter(2,2.0)
+	kernel := generateGaussianFilter(3,1.4)
   imgGray = convolve(imgGray,kernel)
   imgGrad := sobel(imgGray)
 	write_img("/home/maxence/gaussed.png",imgGray)
