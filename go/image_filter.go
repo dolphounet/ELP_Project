@@ -96,11 +96,11 @@ func sobel(img [][]float64) ([][]float64, float64){
       }
     }
 
-  return result, 1
+  return result
 }
 
-func suppressNonMax(matrix [][]float64, height int, width int, max float64) {
-	const tolerance float64 = 0.5
+func suppressNonMax(matrix [][]float64, height int, width int) {
+	const tolerance float64 = 0.85
 
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
@@ -240,17 +240,16 @@ func main() {
 
 	write_img("/home/maxence/grayed.png",imgGray)
 
-	kernel := generateGaussianFilter(8,2.0)
+	kernel := generateGaussianFilter(2,2.0)
   imgGray = convolve(imgGray,kernel)
-  imgGrad,maxval := sobel(imgGray)
+  imgGrad := sobel(imgGray)
 	write_img("/home/maxence/gaussed.png",imgGray)
 
 	write_img("/home/maxence/sobled.png",imgGrad)
-	fmt.Printf("maxval %f", maxval)
 	resize(imgGrad,height,width)
-	//suppressNonMax(imgGrad,height,width,maxval)
+	suppressNonMax(imgGrad,height,width)
 	write_img("/home/maxence/nonmax.png",imgGrad)
-	contouring(imgGrad,height+2,width+2)
+	contouring(imgGrad,height,width)
 
 	write_img("/home/maxence/michel.png",imgGrad)
 }
