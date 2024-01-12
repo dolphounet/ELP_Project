@@ -37,6 +37,23 @@ func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	return filter
 }
 
+func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, height_deb, height_fin, width_deb, width_fin int){
+  for y := height_deb; y<height_fin; y++{
+    for x := width_deb; x<width_fin; x++{
+      sum := float64(0)
+      for i := 0; i<len(kernel); i++{
+        for j := 0; j<len(kernel); j++{
+          if x + i - len(kernel)/2 >= width_deb && y + j - len(kernel)/2 >= height_deb && x+i -len(kernel)/2 < width_fin && y+j-len(kernel)/2<height_fin{
+            sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2]*kernel[i][j]
+          }
+        }
+      }
+      imgRes[y][x] = sum
+    }
+  }
+
+}
+
 func convolve(img [][]float64, kernel [][]float64) [][]float64{
 	width := len(img[0])
 	height := len(img)
@@ -58,7 +75,7 @@ func convolve(img [][]float64, kernel [][]float64) [][]float64{
   return result
 }
 
-func sobel(img [][]float64) [][]float64{
+func sobel(img [][]float64, result [][]float64, height_deb, height_fin, width_deb, width_fin int) {
    x_sobel := [][]float64 {
     {1, 0, -1},
     {2, 0, -2},
@@ -71,31 +88,42 @@ func sobel(img [][]float64) [][]float64{
   }
   width := len(img[0])
 	height := len(img)
-  sumX := convolve(img, x_sobel)
-  sumY := convolve(img, y_sobel)
+
+  sumX := make([][]float64, height)
+  sumY := make([][]float64, height)
+  for i := 0; i < height; i++ {
+    sumX[i] = make([]float64, width)
+    sumY[i] = make([]float64, width)
+  } 
+
+  for i := 0; i < 2; i++ {
+    go convolveParal(img, sumX, x_sobel, height*(i/8), height*((i+1)/8), width*(i/8), width*((i+1)/8))
+  }
+
+  for i := 0; i < 2; i++ {
+    go convolveParal(img, sumY, y_sobel, height*(i/8), height*((i+1)/8), width*(i/8), width*((i+1)/8))
+  }
+
   max_value := float64(0)
-  result_max := make([][]float64, height)
-  for y := 0; y<height; y++{
-    result_max[y] = make([]float64, width)
-    for x := 0; x< width; x++{
+  for y := height_deb; y<height_fin; y++{
+    for x := width_deb; x< width_fin; x++{
       valX := sumX[y][x]
       valY := sumY[y][x]
       gradiant := float64(math.Sqrt(valX*valX + valY*valY))
       if gradiant > max_value {
         max_value = gradiant
       }
-      result_max[y][x] = gradiant
+      result[y][x] = gradiant
     } 
   }
-  result := make([][]float64, height)
-    for y := 0; y<height; y++{
-      result[y] = make([]float64, width)
-      for x := 0; x<width; x++{
-        result[y][x] = result_max[y][x]/max_value
+}
+
+func normalize(result [][]float64, max_value float64)  {
+  for y := height_deb; y<height_fin; y++{
+      for x := width_deb; x<width_fin; x++{
+        result[y][x] = result[y][x]/max_value
       }
     }
-
-  return result
 }
 
 func suppressNonMax(matrix [][]float64, height int, width int) {
@@ -231,7 +259,7 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 
 func main() {
 	
-	img := read_img("/home/maxence/Documents/valve.PNG")
+	img := read_img("/home/maxence/Documents/wall_anime_8K.png")
   imgGray := rgb_to_grayscale(img)
   bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
@@ -239,9 +267,24 @@ func main() {
 	write_img("/home/maxence/grayed.png",imgGray)
 
 	kernel := generateGaussianFilter(3,1.4)
-  imgGray = convolve(imgGray,kernel)
-  imgGrad := sobel(imgGray)
-	write_img("/home/maxence/gaussed.png",imgGray)
+  
+  imgGauss := make([][]float64, height)
+  for i := 0; i < height; i++ {
+    imgGauss[i] = make([]float64, width)
+  }
+
+  for i := 0; i < 8; i++ {
+    go convolveParal(imgGray, imgGauss, kernel, height*(i/8), height*((i+1)/8), width*(i/8), width*((i+1)/8))
+  }
+  
+  imgGrad := make([][]float64, height)
+  for i := 0; i < height; i++ {
+    imgGrad[i] = make([]float64, width)
+  }
+  for i := 0; i < 2; i++ {
+    go sobel(imgGray, imgGrad, height*(i/8), height*((i+1)/8), width*(i/8), width*((i+1)/8))
+  }
+  write_img("/home/maxence/gaussed.png",imgGray)
 
 	write_img("/home/maxence/sobled.png",imgGrad)
 	resize(imgGrad,height,width)
