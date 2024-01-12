@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+  "fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -68,16 +68,16 @@ func sobel(img [][]float64) ([][]float64, float64){
   y_sobel := [][]float64 {
     {1, 2, 1},
     {0, 0, 0},
-    {-1, -2, 1},
+    {-1, -2, -1},
   }
   width := len(img[0])
 	height := len(img)
   sumX := convolve(img, x_sobel)
   sumY := convolve(img, y_sobel)
   max_value := float64(0)
-  result := make([][]float64, height)
+  result_max := make([][]float64, height)
   for y := 0; y<height; y++{
-    result[y] = make([]float64, width)
+    result_max[y] = make([]float64, width)
     for x := 0; x< width; x++{
       valX := sumX[y][x]
       valY := sumY[y][x]
@@ -85,28 +85,39 @@ func sobel(img [][]float64) ([][]float64, float64){
       if gradiant > max_value {
         max_value = gradiant
       }
-      result[y][x] = gradiant
+      result_max[y][x] = gradiant
     } 
   }
-  return result, max_value
+  result := make([][]float64, height)
+    for y := 0; y<height; y++{
+      result[y] = make([]float64, width)
+      for x := 0; x<width; x++{
+        result[y][x] = result_max[y][x]/max_value
+      }
+    }
+
+  return result, 1
 }
 
 func suppressNonMax(matrix [][]float64, height int, width int, max float64) {
-	const tolerance float64 = 0.2
+	const tolerance float64 = 0.5
 
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
 			if matrix[i][j] < (max - tolerance) {
 				matrix[i][j] = 0
-			}
+			}else{
+        matrix[i][j] = 255
+      }
+      
 		}
 	}
 }
 
 func contouring(matrix [][]float64, height int, width int) {
 
-	const lowerThreshold float64 = 4
-	const highThreshold float64 = 6
+	const lowerThreshold float64 = 0.1
+	const highThreshold float64 = 0.5
 
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
@@ -221,20 +232,26 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 }
 
 func main() {
-	bounds := img.Bounds()
+	
+	img := read_img("/home/maxence/Documents/certes.png")
+  imgGray := rgb_to_grayscale(img)
+  bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 
-	img := read_img("home/madmuses/Documents/Cours/ELP_Projects/feur.png")
-	imgGray = rgb_to_grayscale(img)
+	write_img("/home/maxence/grayed.png",imgGray)
 
-	kernel := generateGaussianFilter(5,1.0)
-	imgGray = convolve(imgGray,kernel)
-	imgGrad,maxval = sobel(imgGray)
-	
+	kernel := generateGaussianFilter(8,2.0)
+  imgGray = convolve(imgGray,kernel)
+  imgGrad,maxval := sobel(imgGray)
+	write_img("/home/maxence/gaussed.png",imgGray)
+
+	write_img("/home/maxence/sobled.png",imgGrad)
+	fmt.Printf("maxval %f", maxval)
 	resize(imgGrad,height,width)
-	suppressNonMax(imgGrad,height,width,maxval)
-	contouring(imgGrad,height,width)
+	//suppressNonMax(imgGrad,height,width,maxval)
+	write_img("/home/maxence/nonmax.png",imgGrad)
+	contouring(imgGrad,height+2,width+2)
 
-	write_img("/home/madmuses/michel.png",imgGrad)
+	write_img("/home/maxence/michel.png",imgGrad)
 }
 
