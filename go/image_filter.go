@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-)
+
 
 func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	filter := make([][]float64, size)
@@ -92,7 +92,7 @@ func sobel(img [][]float64) ([][]float64, float64){
 }
 
 func suppressNonMax(matrix [][]float64, height int, width int, max float64) {
-	const tolerance float64 = 3
+	const tolerance float64 = 0.2
 
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
@@ -221,16 +221,20 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 }
 
 func main() {
-	a := [][]float64{
-		{5, 1, 5, 3},
-		{4, 5, 7, 7},
-	}
-	a = resize(a, 2, 4)
-	suppressNonMax(a, 4, 6, 7)
-	contouring(a, 4, 6)
-	for i := range a {
-		fmt.Println(a[i])
-	}
+	bounds := img.Bounds()
+	width, height := bounds.Max.X, bounds.Max.Y
 
+	img := read_img("home/madmuses/Documents/Cours/ELP_Projects/feur.png")
+	imgGray = rgb_to_grayscale(img)
+
+	kernel := generateGaussianFilter(5,1.0)
+	imgGray = convolve(imgGray,kernel)
+	imgGrad,maxval = sobel(imgGray)
+	
+	resize(imgGrad,height,width)
+	suppressNonMax(imgGrad,height,width,maxval)
+	contouring(imgGrad,height,width)
+
+	write_img("/home/madmuses/michel.png",imgGrad)
 }
 
