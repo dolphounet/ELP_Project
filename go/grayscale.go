@@ -12,15 +12,9 @@ import (
 )
 
 // on peut renvoyer des fichiers png et jpeg mais seulement ouvrir et décoder du png
-func main() {
-
-	//à modifier pour importer l'image choisie !!
-
-	const imagefournie string = "/home/maxence/Documents/arch-black-4k"
-	var format string = ".png"
-
+func read_img(imageFournie string) image.Image {
 	// Ouvrir le fichier image
-	imageFile, err := os.Open(imagefournie + format)
+	imageFile, err := os.Open(imageFournie)
 
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +27,40 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Récupère la taille de l'image
+	
+  return img
+}
+
+func write_img(img string, grayMatrix [][]float64)  {
+
+  grayImage := image.NewGray(image.Rect(0, 0, len(grayMatrix[0]), len(grayMatrix)))
+
+	// Parcours de la matrice et assignation des niveaux de gris à l'image
+	for y := 0; y < len(grayMatrix); y++ {
+		for x := 0; x < len(grayMatrix[0]); x++ {
+			grayValue := grayMatrix[y][x]
+			var grayValue2 uint8 = uint8(math.Round(float64(grayValue)))
+			grayImage.SetGray(x, y, color.Gray{Y: grayValue2})
+		}
+	}
+
+	// Création d'un fichier image PNG
+
+	file, err := os.Create(img)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	// Encodage de l'image en format PNG et écriture dans le fichier
+	if err := png.Encode(file, grayImage); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func rgb_to_grayscale(img image.Image) [][]float64 {
+
+  // Récupère la taille de l'image
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 
@@ -43,7 +70,8 @@ func main() {
 		grayMatrix[i] = make([]float64, width)
 	}
 
-	const cstred float64 = 0.299   //constante red
+
+  const cstred float64 = 0.299   //constante red
 	const cstgreen float64 = 0.587 //constante green
 	const cstblue float64 = 0.114  //constante blue
 
@@ -56,8 +84,19 @@ func main() {
 		}
 	}
 
+  return grayMatrix
+}
+
+func main() {
+
+	//à modifier pour importer l'image choisie !!
+
+	const imagefournie string = "/home/maxence/Documents/arch-black-4k"
+	var format string = ".png"
+  img := read_img(imagefournie + format)
+  grayMatrix := rgb_to_grayscale(img)
+	write_img("/home/maxence/Documents/ELP_Project/go/imageGrisee.png", grayMatrix)
 	// Affichage des valeurs R, G, B du premier pixel par exemple et la valeur du niveau de gris
-	fmt.Printf("Valeur de niveau de gris du 6ième pixel : %v\n", grayMatrix[6][0])
 
 	// Affichage de la matrice des niveaux de gris
 	/*for y := 0; y < height; y++ {
@@ -70,29 +109,7 @@ func main() {
 	*/
 
 	//création d'une nouvelle image png en niveaux de gris
-	grayImage := image.NewGray(image.Rect(0, 0, width, height))
-
-	// Parcours de la matrice et assignation des niveaux de gris à l'image
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			grayValue := grayMatrix[y][x]
-			var grayValue2 uint8 = uint8(math.Round(float64(grayValue)))
-			grayImage.SetGray(x, y, color.Gray{Y: grayValue2})
-		}
-	}
-
-	// Création d'un fichier image PNG
-
-	file, err := os.Create(imagefournie + "niveauGris" + format)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	// Encodage de l'image en format PNG et écriture dans le fichier
-	if err := png.Encode(file, grayImage); err != nil {
-		log.Fatal(err)
-	}
+	
 
 	fmt.Printf("Fichier %s créé avec succès.", format)
 }
