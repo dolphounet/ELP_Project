@@ -236,38 +236,6 @@ func write_img(img string, grayMatrix [][]float64)  {
 	}
 }
 
-func crea_graymatrix(){
-	// Récupère la taille de l'image
-	bounds := img.Bounds()
-	width, height := bounds.Max.X, bounds.Max.Y
-
-	//conversion en gray scale using 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue formula per pixel
-	grayMatrix := make([][]float64, height)
-	for i := range grayMatrix {
-	  grayMatrix[i] = make([]float64, width)
-	}
-}
-
-func rgb_to_grayscale_paral(img image.Image [][]float64, imgRes [][]float64, height_deb, height_fin, width_deb, width_fin int) {
-	const cstred float64 = 0.299   //constante red
-	const cstgreen float64 = 0.587 //constante green
-	const cstblue float64 = 0.114  //constante blue
-
-	for y := height_deb; y<height_fin; y++{
-		for x := width_deb; x<width_fin; x++{
-			r, g, b, _ := img.At(x, y).RGBA()
-		  	grayMatrix[y][x] = cstred*float64(r>>8) + cstgreen*float64(g>>8) + cstblue*float64(b>>8)
-		 
-		  
-			  
-			  
-			
-		  
-		  
-		}
-	}
-}
-
 
 func rgb_to_grayscale(img image.Image) [][]float64 {
 
@@ -282,7 +250,7 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 	}
 
 
-  	const cstred float64 = 0.299   //constante red
+  const cstred float64 = 0.299   //constante red
 	const cstgreen float64 = 0.587 //constante green
 	const cstblue float64 = 0.114  //constante blue
 
