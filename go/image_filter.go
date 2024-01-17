@@ -133,38 +133,42 @@ func normalize(result [][]float64, max_value float64)  {
       }
     }
 }
+func suppressNonMax(matrix [][]float64, tolerance float64) {
+	// Initialisation des valeurs
+	width := len(matrix[0])
+	height := len(matrix)
 
-func suppressNonMax(matrix [][]float64, height int, width int) {
-	const tolerance float64 = 0.90
-
+	// Vérification du rapport des pixels au max (1 car 100%) et la tolérance
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
 			if matrix[i][j] < (1 - tolerance) {
 				matrix[i][j] = 0
-			}else{
-        matrix[i][j] = 255
-      }
+			}
 		}
 	}
 }
 
-func contouring(matrix [][]float64, height int, width int) {
+func contouring(matrix [][]float64, lowerThreshold float64, highThreshold float64) {
+	// Initialisation des constantes
+	width := len(matrix[0])
+	height := len(matrix)
 
-	const lowerThreshold float64 = 0.3
-	const highThreshold float64 = 0.4
+	// Parcours de l'image pixel par pixel et comparaison avec les threshold
+	for i := 1; i < height-1; i++ {
+		for j := 1; j < width-1; j++ {
 
-	for i := 0; i < height; i++ {
-		for j := 0; j < width; j++ {
 			if matrix[i][j] < lowerThreshold {
 				matrix[i][j] = 0
+
 			} else if matrix[i][j] > highThreshold {
 				matrix[i][j] = 255
+
 			} else {
+				// Cas ou on est entre les threshold, on vérifie la présence de pixels forts voisins
 				for k := -1; k <= 1; k++ {
 					for l := -1; l <= 1; l++ {
 						if matrix[i+k][j+l] > highThreshold {
 							matrix[i][j] = 255
-							matrix[i+k][j+l] = 255
 						}
 					}
 				}
@@ -176,9 +180,14 @@ func contouring(matrix [][]float64, height int, width int) {
 	}
 }
 
-func resize(matrix [][]float64, height int, width int) [][]float64 {
+func resize(matrix [][]float64) [][]float64 {
+	// Initialisation des valeurs nécessaires
+	width := len(matrix[0])
+	height := len(matrix)
+
 	line := make([]float64, width+2)
 
+	// Ajout des contours à la matrice
 	for i := 0; i < height; i++ {
 		matrix[i] = append(matrix[i], 0)
 		matrix[i] = append([]float64{0}, matrix[i]...)
@@ -188,7 +197,6 @@ func resize(matrix [][]float64, height int, width int) [][]float64 {
 
 	return matrix
 }
-
 
 func read_img(imageFournie string) image.Image {
 	// Ouvrir le fichier image
@@ -274,7 +282,7 @@ func main() {
 
 	write_img("/home/maxence/grayed.png",imgGray)
 
-	kernel := generateGaussianFilter(8,1.4)
+	kernel := generateGaussianFilter(5,1.4)
   
   imgGauss := make([][]float64, height)
   for i := 0; i < height; i++ {
@@ -307,10 +315,11 @@ func main() {
   }
   normalize(imgGrad, max_value)
 	write_img("/home/maxence/sobled.png",imgGrad)
-	resize(imgGrad,height,width)
-	suppressNonMax(imgGrad,height,width)
+	resize(imgGrad)
+	suppressNonMax(imgGrad,0.75)
+
 	write_img("/home/maxence/nonmax.png",imgGrad)
-	contouring(imgGrad,height,width)
+	contouring(imgGrad,0.1, 0.3)
 
 	write_img("/home/maxence/michel.png",imgGrad)
   fmt.Println("c'est bon")
