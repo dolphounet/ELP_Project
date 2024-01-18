@@ -1,21 +1,19 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"log"
 	"math"
 	"os"
-  "sync"
+	"sync"
 )
-
-
 
 func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	filter := make([][]float64, size)
-	center := size/2
+	center := size / 2
 	sum := float64(0)
 
 	for i := 0; i < size; i++ {
@@ -38,100 +36,100 @@ func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	return filter
 }
 
-func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int, wg *sync.WaitGroup){
-  height := len(img)
-  width := len(img[0])
-  for y := 0; y<height; y++{
-    for x := width_deb; x<width_fin; x++{
-      sum := float64(0)
-      for i := 0; i<len(kernel); i++{
-        for j := 0; j<len(kernel); j++{
-          if x + i - len(kernel)/2 >= 0 && y + j - len(kernel)/2 >= 0 && x+i -len(kernel)/2 < width && y+j-len(kernel)/2<height{
-            sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2]*kernel[i][j]
-          }
-        }
-      }
-      imgRes[y][x] = sum
-    }
-  }
-  defer wg.Done()
+func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int, wg *sync.WaitGroup) {
+	height := len(img)
+	width := len(img[0])
+	for y := 0; y < height; y++ {
+		for x := width_deb; x < width_fin; x++ {
+			sum := float64(0)
+			for i := 0; i < len(kernel); i++ {
+				for j := 0; j < len(kernel); j++ {
+					if x+i-len(kernel)/2 >= 0 && y+j-len(kernel)/2 >= 0 && x+i-len(kernel)/2 < width && y+j-len(kernel)/2 < height {
+						sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2] * kernel[i][j]
+					}
+				}
+			}
+			imgRes[y][x] = sum
+		}
+	}
+	defer wg.Done()
 }
 
-func convolve(img [][]float64, kernel [][]float64) [][]float64{
+func convolve(img [][]float64, kernel [][]float64) [][]float64 {
 	width := len(img[0])
 	height := len(img)
-  result := make([][]float64, height)
-  for y := 0; y<height; y++{
-    result[y] = make([]float64, width)
-    for x := 0; x<width; x++{
-      sum := float64(0)
-      for i := 0; i<len(kernel); i++{
-        for j := 0; j<len(kernel); j++{
-          if x + i - len(kernel)/2 >= 0 && y + j - len(kernel)/2 >= 0 && x+i -len(kernel)/2 < width && y+j-len(kernel)/2<height{
-            sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2]*kernel[i][j]
-          }
-        }
-      }
-      result[y][x] = sum
-    }
-  }
-  return result
+	result := make([][]float64, height)
+	for y := 0; y < height; y++ {
+		result[y] = make([]float64, width)
+		for x := 0; x < width; x++ {
+			sum := float64(0)
+			for i := 0; i < len(kernel); i++ {
+				for j := 0; j < len(kernel); j++ {
+					if x+i-len(kernel)/2 >= 0 && y+j-len(kernel)/2 >= 0 && x+i-len(kernel)/2 < width && y+j-len(kernel)/2 < height {
+						sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2] * kernel[i][j]
+					}
+				}
+			}
+			result[y][x] = sum
+		}
+	}
+	return result
 }
 
 func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxChan []float64, wg *sync.WaitGroup) {
-  var wg_sobel sync.WaitGroup
-  x_sobel := [][]float64 {
-    {1, 0, -1},
-    {2, 0, -2},
-    {1, 0, -1},
-  }
-  y_sobel := [][]float64 {
-    {1, 2, 1},
-    {0, 0, 0},
-    {-1, -2, -1},
-  }
-  width := len(img[0])
+	var wg_sobel sync.WaitGroup
+	x_sobel := [][]float64{
+		{1, 0, -1},
+		{2, 0, -2},
+		{1, 0, -1},
+	}
+	y_sobel := [][]float64{
+		{1, 2, 1},
+		{0, 0, 0},
+		{-1, -2, -1},
+	}
+	width := len(img[0])
 	height := len(img)
 
-  sumX := make([][]float64, height)
-  sumY := make([][]float64, height)
-  for i := 0; i < height; i++ {
-    sumX[i] = make([]float64, width)
-    sumY[i] = make([]float64, width)
-  } 
-  for i := float64(0); i < 2; i++ {
-    wg_sobel.Add(2)
-    go convolveParal(img, sumX, x_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)),width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel)
-    go convolveParal(img, sumY, y_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)),width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel)
-  }
-  wg_sobel.Wait()
-  max_value := float64(0)
-  for y := 0; y<height; y++{
-    for x := width_deb; x<width_fin; x++{
-      valX := sumX[y][x]
-      valY := sumY[y][x]
-      gradiant := float64(math.Sqrt(valX*valX + valY*valY))
-      if gradiant > max_value {
-        max_value = gradiant
-      }
-      result[y][x] = gradiant
-    } 
-  }
-  for i := 0; i < len(maxChan); i++ {
-    if maxChan[i] == -1 {
-      maxChan[i] = max_value
-    }
-  }
-  defer wg.Done()
+	sumX := make([][]float64, height)
+	sumY := make([][]float64, height)
+	for i := 0; i < height; i++ {
+		sumX[i] = make([]float64, width)
+		sumY[i] = make([]float64, width)
+	}
+	for i := float64(0); i < 2; i++ {
+		wg_sobel.Add(2)
+		go convolveParal(img, sumX, x_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)), width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel)
+		go convolveParal(img, sumY, y_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)), width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel)
+	}
+	wg_sobel.Wait()
+	max_value := float64(0)
+	for y := 0; y < height; y++ {
+		for x := width_deb; x < width_fin; x++ {
+			valX := sumX[y][x]
+			valY := sumY[y][x]
+			gradiant := float64(math.Sqrt(valX*valX + valY*valY))
+			if gradiant > max_value {
+				max_value = gradiant
+			}
+			result[y][x] = gradiant
+		}
+	}
+	for i := 0; i < len(maxChan); i++ {
+		if maxChan[i] == -1 {
+			maxChan[i] = max_value
+		}
+	}
+	defer wg.Done()
 }
 
-func normalize(result [][]float64, max_value float64)  {
+func normalize(result [][]float64, max_value float64) {
 
-  for y := 0; y<len(result); y++{
-      for x := 0; x<len(result[0]); x++{
-        result[y][x] = result[y][x]/max_value
-      }
-    }
+	for y := 0; y < len(result); y++ {
+		for x := 0; x < len(result[0]); x++ {
+			result[y][x] = result[y][x] / max_value
+		}
+	}
 }
 func suppressNonMax(matrix [][]float64, tolerance float64) {
 	// Initialisation des valeurs
@@ -213,13 +211,12 @@ func read_img(imageFournie string) image.Image {
 		log.Fatal(err)
 	}
 
-	
-  return img
+	return img
 }
 
-func write_img(img string, grayMatrix [][]float64)  {
+func write_img(img string, grayMatrix [][]float64) {
 
-  grayImage := image.NewGray(image.Rect(0, 0, len(grayMatrix[0]), len(grayMatrix)))
+	grayImage := image.NewGray(image.Rect(0, 0, len(grayMatrix[0]), len(grayMatrix)))
 
 	// Parcours de la matrice et assignation des niveaux de gris à l'image
 	for y := 0; y < len(grayMatrix); y++ {
@@ -244,10 +241,24 @@ func write_img(img string, grayMatrix [][]float64)  {
 	}
 }
 
+func rgb_to_grayscale_paral(img image.Image, grayMatrix [][]float64, height, width_deb, width_fin int, wg *sync.WaitGroup) {
+	//conversion en gray scale using 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue formula per pixel
 
+	const cstred float64 = 0.299   //constante red
+	const cstgreen float64 = 0.587 //constante green
+	const cstblue float64 = 0.114  //constante blue
+
+	// Parcours de tous les pixels de l'image et stockage des valeurs R, G, B dans la matrice
+	for y := 0; y < height; y++ {
+		for x := width_deb; x < width_fin; x++ {
+			r, g, b, _ := img.At(x, y).RGBA()
+			grayMatrix[y][x] = cstred*float64(r>>8) + cstgreen*float64(g>>8) + cstblue*float64(b>>8)
+
+		}
+	}
+	defer wg.Done()
+}
 func rgb_to_grayscale(img image.Image) [][]float64 {
-
-    // Récupère la taille de l'image
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 
@@ -257,8 +268,7 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 		grayMatrix[i] = make([]float64, width)
 	}
 
-
-  const cstred float64 = 0.299   //constante red
+	const cstred float64 = 0.299   //constante red
 	const cstgreen float64 = 0.587 //constante green
 	const cstblue float64 = 0.114  //constante blue
 
@@ -271,57 +281,69 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 		}
 	}
 
-  return grayMatrix
+	return grayMatrix
 }
 
-func main() {	
-	img := read_img("/home/maxence/Documents/wall_anime_8K.png")
-  imgGray := rgb_to_grayscale(img)
-  bounds := img.Bounds()
+func main() {
+	img := read_img("C:/testsGO/wall_anime_8K.png")
+
+	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
+	grayMatrix := make([][]float64, height)
+	for i := range grayMatrix {
+		grayMatrix[i] = make([]float64, width)
+	}
 
-	write_img("/home/maxence/grayed.png",imgGray)
+	const cstred float64 = 0.299   //constante red
+	const cstgreen float64 = 0.587 //constante green
+	const cstblue float64 = 0.114  //constante blue
 
-	kernel := generateGaussianFilter(5,1.4)
-  
-  imgGauss := make([][]float64, height)
-  for i := 0; i < height; i++ {
-    imgGauss[i] = make([]float64, width)
-  }
+	var wg sync.WaitGroup
+	for i := float64(0); i < 8; i++ {
+		wg.Add(1)
+		go rgb_to_grayscale_paral(img, grayMatrix, int(float64(height)), int(float64(width)*(i/8)), int(float64(width)*((i+1)/8)), &wg)
+	}
+	wg.Wait()
+	write_img("C:/testsGO/grayed.png", grayMatrix)
 
-  var wg sync.WaitGroup
-  for i := float64(0); i < 8; i++ {
-    wg.Add(1)
-    go convolveParal(imgGray, imgGauss, kernel, int(float64(width)*(i/8)), int(float64(width)*((i+1)/8)), &wg)
-  }
-  wg.Wait()
-  max_valueChan := []float64{-1, -1}
+	kernel := generateGaussianFilter(5, 1.4)
 
-  imgGrad := make([][]float64, height)
-  for i := 0; i < height; i++ {
-    imgGrad[i] = make([]float64, width)
-  }
-  for i := float64(0); i < 2; i++ {
-    wg.Add(1)
-    go sobel(imgGauss, imgGrad, int(float64(width)*(i/2)), int(float64(width)*((i+1)/2)), max_valueChan, &wg)
-  }
-  wg.Wait()
-  write_img("/home/maxence/gaussed.png",imgGauss)
-  max_value := max_valueChan[0]
-  for _, value := range max_valueChan{
-    if value > max_value{
-      max_value = value
-    }
-  }
-  normalize(imgGrad, max_value)
-	write_img("/home/maxence/sobled.png",imgGrad)
+	imgGauss := make([][]float64, height)
+	for i := 0; i < height; i++ {
+		imgGauss[i] = make([]float64, width)
+	}
+
+	for i := float64(0); i < 8; i++ {
+		wg.Add(1)
+		go convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/8)), int(float64(width)*((i+1)/8)), &wg)
+	}
+	wg.Wait()
+	max_valueChan := []float64{-1, -1}
+
+	imgGrad := make([][]float64, height)
+	for i := 0; i < height; i++ {
+		imgGrad[i] = make([]float64, width)
+	}
+	for i := float64(0); i < 2; i++ {
+		wg.Add(1)
+		go sobel(imgGauss, imgGrad, int(float64(width)*(i/2)), int(float64(width)*((i+1)/2)), max_valueChan, &wg)
+	}
+	wg.Wait()
+	write_img("C:/testsGO/gaussed.png", imgGauss)
+	max_value := max_valueChan[0]
+	for _, value := range max_valueChan {
+		if value > max_value {
+			max_value = value
+		}
+	}
+	normalize(imgGrad, max_value)
+	write_img("C:/testsGO/sobled.png", imgGrad)
 	resize(imgGrad)
-	suppressNonMax(imgGrad,0.75)
+	suppressNonMax(imgGrad, 0.75)
 
-	write_img("/home/maxence/nonmax.png",imgGrad)
-	contouring(imgGrad,0.1, 0.3)
+	write_img("C:/testsGO/nonmax.png", imgGrad)
+	contouring(imgGrad, 0.1, 0.3)
 
-	write_img("/home/maxence/michel.png",imgGrad)
-  fmt.Println("c'est bon")
+	write_img("C:/testsGO/michel.png", imgGrad)
+	fmt.Println("c'est bon")
 }
-
