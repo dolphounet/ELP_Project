@@ -9,6 +9,8 @@ module Main exposing (..)
 import Browser
 import Html exposing (Html, text, pre)
 import Http
+import Random
+
 
 
 
@@ -50,14 +52,17 @@ init _ =
 
 type Msg
   = GotText (Result Http.Error String)
+  | NewNumber Int 
 
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> List String -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NewNumber newnumber ->
+
     GotText result ->
       case result of
         Ok fullText ->
+          
           (Success fullText, Cmd.none)
 
         Err _ ->
@@ -73,9 +78,30 @@ subscriptions model =
   Sub.none
 
 
-
 -- VIEW
+len lst = case lst of
+   [] -> 0
+   (x :: xs) -> 1 + len xs
 
+extract_from_list : List String -> Random.Generator Int -> String
+extract_from_list lst indice = case indice of
+  0 -> case lst of 
+    [] -> ""
+    [x] -> x
+    (x :: xs) -> x
+  a -> case lst of 
+    [] -> ""
+    [x] -> x
+    (x :: xs) -> extract_from_list xs (a-1)
+
+
+
+
+
+
+
+
+  
 
 view : Model -> Html Msg
 view model =
