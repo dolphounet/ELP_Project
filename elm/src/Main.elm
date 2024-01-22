@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, Attribute, text, pre, div, input, button)
+import Html exposing (Html, Attribute, text, pre, div, input, button, label)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Http
@@ -35,12 +35,13 @@ type alias Model
   , textlist : List String
   , userWord : String 
   , word : String
-  , numRandom : Int}
+  , numRandom : Int
+  , solution : Bool}
 
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1}
+  ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1, solution = False}
   , Http.get
       { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt"
       , expect = Http.expectString GotText
@@ -57,6 +58,7 @@ type Msg
   | NewNumber Int  
   | ChangeInput String
   | NewWord
+  | SolChange
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -69,14 +71,17 @@ update msg model =
           let 
             text_list = String.split " " fullText
           in
-          ({file = Success fullText,  word = extract_from_list text_list model.numRandom, textlist = text_list, numRandom = model.numRandom,userWord = model.userWord }, Random.generate NewNumber (Random.int 1 (len(text_list))))
+          ({model | file = Success fullText,  word = extract_from_list text_list model.numRandom, textlist = text_list}, Random.generate NewNumber (Random.int 1 (len(text_list))))
         Err _ ->
           ({model | file = Failure}, Cmd.none)    
     ChangeInput word -> 
       ({model | userWord = word}, Cmd.none)
 
     NewWord -> 
-      ({file = model.file,  word = extract_from_list model.textlist model.numRandom, textlist = model.textlist, numRandom = model.numRandom,userWord = "" }, Random.generate NewNumber (Random.int 1 (len(model.textlist))))
+      ({model | word = extract_from_list model.textlist model.numRandom, userWord = "" }, Random.generate NewNumber (Random.int 1 (len(model.textlist))))
+
+    SolChange -> 
+      ({model | solution = not model.solution}, Cmd.none)
       
 
 
@@ -114,13 +119,20 @@ view model =
     Loading ->
       text "Loading..."
 
-    Success fullText ->
-      pre [] [ text fullText ]
+    Success _ ->
+      if model.solution then 
+        label [] [ text model.word ]
+      else 
+        label [] [ text "Guess it" ]
     ]
     
-  , div [] [ if model.userWord == model.word then text "You guessed it !" else if model.userWord == "" then text "Type in your guess" else text model.word]
+  , div [] [ if model.userWord == model.word then 
+    text "You guessed it !" 
+  else if model.userWord == "" then 
+    text "Type in your guess" 
+  else text "Try again !" ]
   , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
-  , div [] [ input [type_ "checkbox"] []  , text "Show the solution"] 
-  , div [] [ button [ onClick NewWord ] [text "New Word"] ] ]
+  , label [] [ input [type_ "checkbox", onClick SolChange] []  , text "Show the solution"] 
+  , div [] [ button [ onClick NewWord ] [text "New word"] ] ]
 
 
