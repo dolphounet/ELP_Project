@@ -1,13 +1,9 @@
--- Make a GET request to load a book called "Public Opinion"
---
--- Read how it works:
---   https://guide.elm-lang.org/effects/http.html
--- 
-
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, pre)
+import Html exposing (Html, Attribute, text, pre, div, input)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 import Http
 
 
@@ -27,16 +23,20 @@ main =
 
 -- MODEL
 
-
-type Model
+type Status 
   = Failure
   | Loading
   | Success String
 
+type alias Model
+  = { file : Status
+  , userWord : String 
+  , word : String}
+
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Loading
+  ( {file = Loading, userWord = "", word = "any"}
   , Http.get
       { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt"
       , expect = Http.expectString GotText
@@ -49,7 +49,8 @@ init _ =
 
 
 type Msg
-  = GotText (Result Http.Error String)
+  = GotText (Result Http.Error String) 
+  | ChangeInput String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -58,10 +59,11 @@ update msg model =
     GotText result ->
       case result of
         Ok fullText ->
-          (Success fullText, Cmd.none)
-
+          ({model | file = Success fullText}, Cmd.none)
         Err _ ->
-          (Failure, Cmd.none)
+          ({model | file = Failure}, Cmd.none)    
+    ChangeInput word -> 
+      ({model | userWord = word}, Cmd.none)
 
 
 
@@ -79,7 +81,8 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-  case model of
+  div [] [
+  div [] [ case model.file of
     Failure ->
       text "I was unable to load your book."
 
@@ -88,3 +91,10 @@ view model =
 
     Success fullText ->
       pre [] [ text fullText ]
+    ]
+    
+  , div [] [ if model.userWord == model.word then text "You guessed it !" else if model.userWord == "" then text "Type in your guess" else text "Try again"]
+  , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
+  , div [] [ input [type_ "checkbox"] []  , text "Show the solution"] ]
+
+
