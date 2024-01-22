@@ -42,10 +42,10 @@ type alias Model
 init : () -> (Model, Cmd Msg)
 init _ =
   ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1, solution = False}
-  , Http.get
+  ,Cmd.batch [Http.get
       { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt"
       , expect = Http.expectString GotText
-      }
+      }, Random.generate NewNumber (Random.int 1 1000)]
   )
 
 
