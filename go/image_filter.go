@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"sync"
+	"time"
 )
 
 func generateGaussianFilter(size int, sigma float64) [][]float64 {
@@ -123,7 +124,14 @@ func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxCha
 	defer wg.Done()
 }
 
-func normalize(result [][]float64, max_value float64) {
+func normalize(result [][]float64, max_valueChan []float64) {
+
+	max_value := max_valueChan[0]
+	for _, value := range max_valueChan {
+		if value > max_value {
+			max_value = value
+		}
+	}
 
 	for y := 0; y < len(result); y++ {
 		for x := 0; x < len(result[0]); x++ {
@@ -146,36 +154,36 @@ func suppressNonMax(matrix [][]float64, tolerance float64) {
 	}
 }
 
-func contouring(matrix [][]float64, lowerThreshold float64, highThreshold float64) {
+func contouring(matrix [][]float64, result [][]float64, lowerThreshold float64, highThreshold float64, width_deb, width_fin int, wg *sync.WaitGroup) {
 	// Initialisation des constantes
-	width := len(matrix[0])
 	height := len(matrix)
 
 	// Parcours de l'image pixel par pixel et comparaison avec les threshold
 	for i := 1; i < height-1; i++ {
-		for j := 1; j < width-1; j++ {
+		for j := width_deb; j < width_fin+1; j++ {
 
 			if matrix[i][j] < lowerThreshold {
-				matrix[i][j] = 0
+				result[i][j] = 0
 
 			} else if matrix[i][j] > highThreshold {
-				matrix[i][j] = 255
+				result[i][j] = 255
 
 			} else {
 				// Cas ou on est entre les threshold, on vérifie la présence de pixels forts voisins
 				for k := -1; k <= 1; k++ {
 					for l := -1; l <= 1; l++ {
 						if matrix[i+k][j+l] > highThreshold {
-							matrix[i][j] = 255
+							result[i][j] = 255
 						}
 					}
 				}
 				if matrix[i][j] != 255 {
-					matrix[i][j] = 0
+					result[i][j] = 0
 				}
 			}
 		}
 	}
+	defer wg.Done()
 }
 
 func resize(matrix [][]float64) [][]float64 {
@@ -214,14 +222,14 @@ func read_img(imageFournie string) image.Image {
 	return img
 }
 
-func write_img(img string, grayMatrix [][]float64) {
+func write_img(img string, matrix [][]float64) {
 
-	grayImage := image.NewGray(image.Rect(0, 0, len(grayMatrix[0]), len(grayMatrix)))
+	grayImage := image.NewGray(image.Rect(0, 0, len(matrix[0]), len(matrix)))
 
 	// Parcours de la matrice et assignation des niveaux de gris à l'image
-	for y := 0; y < len(grayMatrix); y++ {
-		for x := 0; x < len(grayMatrix[0]); x++ {
-			grayValue := grayMatrix[y][x]
+	for y := 0; y < len(matrix); y++ {
+		for x := 0; x < len(matrix[0]); x++ {
+			grayValue := matrix[y][x]
 			var grayValue2 uint8 = uint8(math.Round(float64(grayValue)))
 			grayImage.SetGray(x, y, color.Gray{Y: grayValue2})
 		}
@@ -285,65 +293,78 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 }
 
 func main() {
-	img := read_img("C:/testsGO/wall_anime_8K.png")
+	start := time.Now()
+
+	// Gestion d'images
+	img := read_img("../input/wall_anime_8K.png")
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
-	grayMatrix := make([][]float64, height)
-	for i := range grayMatrix {
-		grayMatrix[i] = make([]float64, width)
-	}
 
-	const cstred float64 = 0.299   //constante red
-	const cstgreen float64 = 0.587 //constante green
-	const cstblue float64 = 0.114  //constante blue
+	const cstred float64 = 0.299   //constante red pour la norme grayscale
+	const cstgreen float64 = 0.587 //constante green pour la norme grayscale
+	const cstblue float64 = 0.114  //constante blue pour la norme grayscale
 
-	var wg sync.WaitGroup
-	for i := float64(0); i < 8; i++ {
-		wg.Add(1)
-		go rgb_to_grayscale_paral(img, grayMatrix, int(float64(height)), int(float64(width)*(i/8)), int(float64(width)*((i+1)/8)), &wg)
-	}
-	wg.Wait()
-	write_img("C:/testsGO/grayed.png", grayMatrix)
+	// Paramètres de fonctions
+	kernelSize := 5
+	sigma := float64(1.4)
 
-	kernel := generateGaussianFilter(5, 1.4)
-
-	imgGauss := make([][]float64, height)
-	for i := 0; i < height; i++ {
-		imgGauss[i] = make([]float64, width)
-	}
-
-	for i := float64(0); i < 8; i++ {
-		wg.Add(1)
-		go convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/8)), int(float64(width)*((i+1)/8)), &wg)
-	}
-	wg.Wait()
+	// Elements fixes de fonctions
+	kernel := generateGaussianFilter(kernelSize, sigma)
 	max_valueChan := []float64{-1, -1}
 
+	// Matrices d'écriture
+	grayMatrix := make([][]float64, height)
+	imgGauss := make([][]float64, height)
 	imgGrad := make([][]float64, height)
+	imgRes := make([][]float64, height+2)
+
+	// Initalisation des matrices
 	for i := 0; i < height; i++ {
+		grayMatrix[i] = make([]float64, width)
+		imgGauss[i] = make([]float64, width)
 		imgGrad[i] = make([]float64, width)
 	}
-	for i := float64(0); i < 2; i++ {
+	for i := 0; i < height+2; i++ {
+		imgRes[i] = make([]float64, width+2)
+	}
+	// Variables de threads
+	threads := float64(16)
+	var wg sync.WaitGroup
+
+	for i := float64(0); i < threads; i++ {
 		wg.Add(1)
-		go sobel(imgGauss, imgGrad, int(float64(width)*(i/2)), int(float64(width)*((i+1)/2)), max_valueChan, &wg)
+		go rgb_to_grayscale_paral(img, grayMatrix, int(float64(height)), int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
 	}
 	wg.Wait()
-	write_img("C:/testsGO/gaussed.png", imgGauss)
-	max_value := max_valueChan[0]
-	for _, value := range max_valueChan {
-		if value > max_value {
-			max_value = value
-		}
+	write_img("../output/grayed.png", grayMatrix)
+
+	for i := float64(0); i < threads; i++ {
+		wg.Add(1)
+		go convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
 	}
-	normalize(imgGrad, max_value)
-	write_img("C:/testsGO/sobled.png", imgGrad)
+	wg.Wait()
+
+	for i := float64(0); i < threads/4; i++ {
+		wg.Add(1)
+		go sobel(imgGauss, imgGrad, int(float64(width)*(i/(threads/4))), int(float64(width)*((i+1)/(threads/4))), max_valueChan, &wg)
+	}
+	wg.Wait()
+	write_img("../output/gaussed.png", imgGauss)
+
+	normalize(imgGrad, max_valueChan)
 	resize(imgGrad)
-	suppressNonMax(imgGrad, 0.75)
+	suppressNonMax(imgGrad, 0.9)
 
-	write_img("C:/testsGO/nonmax.png", imgGrad)
-	contouring(imgGrad, 0.1, 0.3)
+	for i := float64(0); i < threads; i++ {
+		wg.Add(1)
+		go contouring(imgGrad, imgRes, 0.3, 0.4, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
+	}
+	wg.Wait()
 
-	write_img("C:/testsGO/michel.png", imgGrad)
-	fmt.Println("c'est bon")
+	elapsed := time.Since(start)
+
+	write_img("../output/michel.png", imgRes)
+
+	fmt.Printf("c'est bon : %s\n", elapsed)
 }
