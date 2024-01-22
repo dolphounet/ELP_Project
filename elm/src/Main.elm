@@ -1,13 +1,13 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, Attribute, text, pre, div, input)
+import Html exposing (Html, Attribute, text, pre, div, input, button, label)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 import Http
 import Json.Decode as JD exposing (Decoder, map2, field, string)
 import Browser.Dom exposing (Element)
-
+import Random
 
 -- MAIN
 
@@ -32,8 +32,13 @@ type Status
 
 type alias Model
   = { file : Status
+  , textlist : List String
   , userWord : String 
-  , word : String}
+  , word : String
+  , numRandom : Int
+  , solution : Bool
+  , definition : Cmd Msg
+  }
 
 type alias Def =
   { word : String
@@ -53,31 +58,39 @@ type alias Definition =
 --}
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( {file = Loading, userWord = "", word = "any"}
-  , getRandomDef)
-
-getWordList : Cmd Msg
-getWordList = 
-  Http.get
+  ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1, solution = False,definition = Cmd.none}
+  ,Cmd.batch [Http.get
       { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt"
-      , expect = Http.expectString GotText}
+      , expect = Http.expectString GotText
+      }, Random.generate NewNumber (Random.int 1 1000)]
+  )
+
+
 
 -- UPDATE
 
 
 type Msg
-  = GotText (Result Http.Error String) 
+  = GotText (Result Http.Error String)
+  | NewNumber Int  
   | ChangeInput String
   | GotDef (Result Http.Error (List Def))
-
+  | NewWord
+  | SolChange
+  | GetRdmDef
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NewNumber newnumber ->
+      ({model | numRandom = newnumber}, Cmd.none)
     GotText result ->
       case result of
         Ok fullText ->
-          ({model | file = Success fullText}, Cmd.none)
+          let 
+            text_list = String.split " " fullText
+          in
+          ({model | file = Success fullText,  word = extract_from_list text_list model.numRandom, textlist = text_list}, Random.generate NewNumber (Random.int 1 (len(text_list))))
         Err _ ->
           ({model | file = Failure}, Cmd.none)    
     ChangeInput word -> 
@@ -90,6 +103,15 @@ update msg model =
 
         Err _ ->
           ({model | file = Failure}, Cmd.none)
+    NewWord -> 
+      ({model | word = extract_from_list model.textlist model.numRandom, userWord = "" }, Cmd.batch[Random.generate NewNumber (Random.int 1 (len(model.textlist)))])
+
+    SolChange -> 
+      ({model | solution = not model.solution}, Cmd.none)
+
+    GetRdmDef ->
+      ({model | definition = getRandomDef model.word}, Cmd.none)
+      
 
 
 -- SUBSCRIPTIONS
@@ -100,13 +122,22 @@ subscriptions model =
   Sub.none
 
 
---Visuals
-
-
-
 
 -- VIEW
+len lst = case lst of
+   [] -> 0
+   (x :: xs) -> 1 + len xs
 
+extract_from_list : List String -> Int -> String
+extract_from_list lst indice = case indice of
+  0 -> case lst of 
+    [] -> ""
+    [x] -> x
+    (x :: xs) -> x
+  a -> case lst of 
+    [] -> ""
+    [x] -> x
+    (x :: xs) -> extract_from_list xs (a-1)
 
 view : Model -> Html Msg
 view model =
@@ -118,26 +149,33 @@ view model =
     Loading ->
       text "Loading..."
 
+    Success _ ->
+      if model.solution then 
+        label [] [ text model.word ]
+      else 
+        label [] [ text "Guess it" ]
+    
     SucessDef def ->
       div [] [text "Michel"]
+  ]
 
-    Success fullText ->
-      pre [] [ text fullText ]
-    ]
+  , div [] [ if model.userWord == model.word then 
+    text "You guessed it !" 
+  else if model.userWord == "" then 
+    text "Type in your guess" 
+  else text "Try again !" ]
+  , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
+  , label [] [ input [type_ "checkbox", onClick SolChange] []  , text "Show the solution"] 
+  , div [] [ button [ onClick NewWord ] [text "New word"] ] ]
+
     
-    , div [] [ if model.userWord == model.word then text "You guessed it !" else if model.userWord == "" then text "Type in your guess" else text "Try again"]
-    , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
-    , div [] [ input [type_ "checkbox"] []  , text "Show the solution"] ]
-
-    
-
--- HTTP
 
 
-getRandomDef : Cmd Msg
-getRandomDef =
+
+getRandomDef : String -> Cmd Msg
+getRandomDef word =
   Http.get
-    { url = "https://api.dictionaryapi.dev/api/v2/entries/en/hello"
+    { url = "https://api.dictionaryapi.dev/api/v2/entries/en/Hello" ++ word
     , expect = Http.expectJson GotDef wordDecoder
     }
 
