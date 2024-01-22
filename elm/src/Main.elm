@@ -1,15 +1,14 @@
-module Main exposing (..)
-
--- Input a user name and password. Make sure the password matches.
+-- Make a GET request to load a book called "Public Opinion"
 --
 -- Read how it works:
---   https://guide.elm-lang.org/architecture/forms.html
---
+--   https://guide.elm-lang.org/effects/http.html
+-- 
+
+module Main exposing (..)
 
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html exposing (Html, text, pre)
+import Http
 
 
 
@@ -17,23 +16,32 @@ import Html.Events exposing (onInput)
 
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.element
+    { init = init
+    , update = update
+    , subscriptions = subscriptions
+    , view = view
+    }
 
 
 
 -- MODEL
 
 
-type alias Model =
-  { name : String
-  , password : String
-  , passwordAgain : String
-  }
+type Model
+  = Failure
+  | Loading
+  | Success String
 
 
-init : Model
-init =
-  Model "" "" ""
+init : () -> (Model, Cmd Msg)
+init _ =
+  ( Loading
+  , Http.get
+      { url = "https://elm-lang.org/assets/public-opinion.txt"
+      , expect = Http.expectString GotText
+      }
+  )
 
 
 
@@ -41,14 +49,29 @@ init =
 
 
 type Msg
-  = Guess String
+  = GotText (Result Http.Error String)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Guess guess ->
-      { model | guess = guess }
+    GotText result ->
+      case result of
+        Ok fullText ->
+          (Success fullText, Cmd.none)
+
+        Err _ ->
+          (Failure, Cmd.none)
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
+
 
 
 -- VIEW
@@ -56,10 +79,12 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ viewInput "text" "Guess" model.guess Guess]
+  case model of
+    Failure ->
+      text "I was unable to load your book."
 
+    Loading ->
+      text "Loading..."
 
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-  input [ type_ t, placeholder p, value v, onInput toMsg ] []
+    Success fullText ->
+      pre [] [ text fullText ]
