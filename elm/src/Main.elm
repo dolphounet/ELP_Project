@@ -121,18 +121,19 @@ view model =
 
     Success _ ->
       if model.solution then 
-        label [] [ text model.word ]
+        label [style "font-weight" "bold", style "font-size" "3em"] [ text model.word ]
       else 
-        label [] [ text "Guess it" ]
+        label [style "font-weight" "bold", style "font-size" "3em"] [ text "Guess it" ]
     ]
     
   , div [] [ if model.userWord == model.word then 
-    text "You guessed it !" 
+    label [style "color" "green", style "font-weight" "bold"][text "You guessed it !"]
   else if model.userWord == "" then 
-    text "Type in your guess" 
-  else text "Try again !" ]
+    label [][text "Type in your guess" ]
+  else 
+    label [style "color" "red"] [ text "Try again !" ]]
   , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
-  , label [] [ input [type_ "checkbox", onClick SolChange] []  , text "Show the solution"] 
+  , label [style "padding" "7.5px", style "font-size" "0.90em"] [ input [type_ "checkbox", onClick SolChange] []  , text "show the solution" ]
   , div [] [ button [ onClick NewWord ] [text "New word"] ] ]
 
 
