@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, Attribute, text, pre, div, input, button, label)
+import Html exposing (Html, Attribute, text, pre, div, input, button, label, span, li, ul, ol)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Http
@@ -28,7 +28,7 @@ type Status
   = Failure
   | Loading
   | Success String
-  | SucessDef (List Def)
+  | SuccessDef (List Def)
 
 type alias Model
   = { file : Status
@@ -37,7 +37,7 @@ type alias Model
   , word : String
   , numRandom : Int
   , solution : Bool
-  , definition : Cmd Msg
+  , definition : Status
   }
 
 type alias Def =
@@ -58,7 +58,7 @@ type alias Definition =
 --}
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1, solution = False,definition = Cmd.none}
+  ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1, solution = False,definition = Loading}
   ,Cmd.batch [Http.get
       { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt"
       , expect = Http.expectString GotText
@@ -77,7 +77,6 @@ type Msg
   | GotDef (Result Http.Error (List Def))
   | NewWord
   | SolChange
-  | GetRdmDef
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -89,8 +88,9 @@ update msg model =
         Ok fullText ->
           let 
             text_list = String.split " " fullText
+            newWord = extract_from_list text_list model.numRandom
           in
-          ({model | file = Success fullText,  word = extract_from_list text_list model.numRandom, textlist = text_list}, Random.generate NewNumber (Random.int 1 (len(text_list))))
+          ({model | file = Success fullText,  word = newWord, textlist = text_list},Cmd.batch[Random.generate NewNumber (Random.int 1 (len(text_list))), getRandomDef newWord])
         Err _ ->
           ({model | file = Failure}, Cmd.none)    
     ChangeInput word -> 
@@ -99,20 +99,18 @@ update msg model =
     GotDef result ->
       case result of
         Ok def ->
-          ({model | file = SucessDef def}, Cmd.none)
+          ({model | definition = SuccessDef def}, Cmd.none)
 
         Err _ ->
-          ({model | file = Failure}, Cmd.none)
+          ({model | definition = Failure}, Cmd.none)
     NewWord -> 
-      ({model | word = extract_from_list model.textlist model.numRandom, userWord = "" }, Cmd.batch[Random.generate NewNumber (Random.int 1 (len(model.textlist)))])
+      let
+        newWord = extract_from_list model.textlist model.numRandom
+      in
+      ({model | word = newWord, userWord = "", definition = Loading}, Cmd.batch[Random.generate NewNumber (Random.int 1 (len(model.textlist))), getRandomDef newWord])
 
     SolChange -> 
       ({model | solution = not model.solution}, Cmd.none)
-
-    GetRdmDef ->
-      ({model | definition = getRandomDef model.word}, Cmd.none)
-      
-
 
 -- SUBSCRIPTIONS
 
@@ -153,11 +151,26 @@ view model =
       if model.solution then 
         label [style "font-weight" "bold", style "font-size" "3em"] [ text model.word ]
       else 
-        label [] [ text "Guess it" ]
+        label [style "font-weight" "bold", style "font-size" "3em"] [ text "Guess it" ]
+
+    SuccessDef _ -> 
+      text "Bug in the code"
     
-    SucessDef def ->
-      div [] [text "Michel"]
   ]
+  , div [] [
+    case model.definition of 
+      Failure -> 
+        text "Could not get a definition"
+      
+      Loading -> 
+        text "Data is loading"
+
+      SuccessDef def ->
+        ol [] (defParsing def)
+
+      Success _ -> 
+        text "Bug in the code"
+    ]
 
   , div [] [ if model.userWord == model.word then 
     label [style "color" "green", style "font-weight" "bold"][text "You guessed it !"]
@@ -166,7 +179,7 @@ view model =
   else 
     label [style "color" "red"] [ text "Try again !" ]]
   , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
-  , label [style "padding" "7.5px", style "font-size" "0.90em"] [ input [type_ "checkbox", onClick SolChange] []  , text "show the solution" ]
+  , label [style "padding" "7.5px", style "font-size" "0.90em"] [ input [type_ "checkbox", onClick SolChange] []  , span [style "padding" "7.5px"] [text "show the solution" ]]
   , div [] [ button [ onClick NewWord ] [text "New word"] ] ]
 
     
@@ -176,7 +189,7 @@ view model =
 getRandomDef : String -> Cmd Msg
 getRandomDef word =
   Http.get
-    { url = "https://api.dictionaryapi.dev/api/v2/entries/en/Hello" ++ word
+    { url = "https://api.dictionaryapi.dev/api/v2/entries/en/" ++ word
     , expect = Http.expectJson GotDef wordDecoder
     }
 
@@ -195,3 +208,18 @@ meaningDecoder =
   map2 Meaning
     (field "partOfSpeech" string)
     (field "definitions" (JD.list (field "definition" string)))
+
+defParsing : List Def -> List (Html Msg)
+defParsing defs = case defs of 
+  (x :: xs) -> (li [] [ ul [] (meaningParsing x.meanings) ] :: defParsing xs)
+  [] -> []
+
+meaningParsing : List Meaning -> List (Html Msg)
+meaningParsing meanings = case meanings of 
+  (x :: xs) -> (li [] [ text x.partOfSpeech, ol [] (definitionParsing x.definitions) ] :: meaningParsing xs)
+  [] -> []
+
+definitionParsing  : List String -> List (Html Msg)
+definitionParsing definitions = case definitions of 
+  (x :: xs) -> (li [] [text x]  :: definitionParsing xs)
+  [] -> []
