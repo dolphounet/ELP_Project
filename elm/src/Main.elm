@@ -166,7 +166,7 @@ view model =
         text "Data is loading"
 
       SuccessDef def ->
-        ol [] (defParsing def)
+        ol [] (wordParsing def)
 
       Success _ -> 
         text "Bug in the code"
@@ -209,9 +209,9 @@ meaningDecoder =
     (field "partOfSpeech" string)
     (field "definitions" (JD.list (field "definition" string)))
 
-defParsing : List Def -> List (Html Msg)
-defParsing defs = case defs of 
-  (x :: xs) -> (li [] [ ul [] (meaningParsing x.meanings) ] :: defParsing xs)
+wordParsing : List Def -> List (Html Msg)
+wordParsing defs = case defs of 
+  (x :: xs) -> (li [] [ ul [] (meaningParsing x.meanings) ] :: wordParsing xs)
   [] -> []
 
 meaningParsing : List Meaning -> List (Html Msg)
