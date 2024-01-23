@@ -58,7 +58,7 @@ func convolve(img [][]float64, kernel [][]float64) [][]float64 {
 	return result
 }
 
-func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int, wg *sync.WaitGroup, main int, index float64) {
+func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int, wg *sync.WaitGroup, main int) {
 
 	height := len(imgRes)
 	width := len(imgRes[0])
@@ -82,7 +82,7 @@ func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, widt
 	}
 }
 
-func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxChan []float64, index float64) {
+func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxChan []float64) {
 	//fmt.Printf("Sobel : Routine : %f, deb : %d, fin : %d \n", index, width_deb, width_fin)
 	var wg_sobel sync.WaitGroup
 	x_sobel := [][]float64{
@@ -106,8 +106,8 @@ func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxCha
 	}
 	for i := float64(0); i < 2; i++ {
 		wg_sobel.Add(2)
-		go convolveParal(img, sumX, x_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)), width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel, 0, index)
-		go convolveParal(img, sumY, y_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)), width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel, 0, index)
+		go convolveParal(img, sumX, x_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)), width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel, 0)
+		go convolveParal(img, sumY, y_sobel, width_deb+int(float64(width_fin-width_deb)*(i/2)), width_deb+int(float64(width_fin-width_deb)*((i+1)/2)), &wg_sobel, 0)
 	}
 	wg_sobel.Wait()
 
@@ -128,7 +128,6 @@ func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxCha
 			maxChan[i] = max_value
 		}
 	}
-
 }
 
 func normalize(result [][]float64, max_valueChan []float64) {
@@ -302,16 +301,17 @@ func rgb_to_grayscale(img image.Image) [][]float64 {
 func worker(img image.Image, grayMatrix, imgGauss, imgGrad, kernel [][]float64, max_valueChan []float64, height, width int, i, threads float64, keypointer *sync.WaitGroup) {
 
 	rgb_to_grayscale_paral(img, grayMatrix, int(float64(height)), int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
-	convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), keypointer, 1, i)
-	sobel(imgGauss, imgGrad, int(float64(width)*(i/(threads/4))), int(float64(width)*((i+1)/(threads/4))), max_valueChan, i)
-	write_img("../output/gaussed.png", imgGauss)
+	convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), keypointer, 1)
+	if int(i)%4 == 0 {
+		sobel(imgGauss, imgGrad, int(float64(width)*((i/4)/(threads/4))), int(float64(width)*(((i/4)+1)/(threads/4))), max_valueChan)
+	}
 }
 
 func main() {
 	start := time.Now()
 
 	// Gestion d'images
-	img := read_img("../input/wall_anime_8K.png")
+	img := read_img("input/wall_anime_8K.png")
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
@@ -331,8 +331,8 @@ func main() {
 	// Matrices d'écriture
 	grayMatrix := make([][]float64, height)
 	imgGauss := make([][]float64, height)
-	imgGrad := make([][]float64, height)
 	imgRes := make([][]float64, height+2)
+	imgGrad := make([][]float64, height)
 
 	// Initalisation des matrices
 	for i := 0; i < height; i++ {
@@ -359,20 +359,21 @@ func main() {
 	}
 	// Need to wait for full image
 	wg.Wait()
+
 	normalize(imgGrad, max_valueChan)
 	resize(imgGrad)
-	suppressNonMax(imgGrad, 0.9)
+	suppressNonMax(imgGrad, 0.7)
 
 	for i := float64(0); i < threads; i++ {
 		wg.Add(1)
-		go contouring(imgGrad, imgRes, 0.3, 0.4, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
+		go contouring(imgGrad, imgRes, 0.1, 0.2, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
 	}
 	wg.Wait()
 
 	//Image writing
-	write_img("../output/grayed.png", grayMatrix)
+	write_img("output/grayed.png", grayMatrix)
 
-	write_img("../output/michel.png", imgRes)
+	write_img("output/michel.png", imgRes)
 
 	// See time
 	elapsed := time.Since(start)
