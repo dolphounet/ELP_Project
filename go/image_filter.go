@@ -37,32 +37,10 @@ func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	return filter
 }
 
-func convolve(img [][]float64, kernel [][]float64) [][]float64 {
-	width := len(img[0])
-	height := len(img)
-	result := make([][]float64, height)
-	for y := 0; y < height; y++ {
-		result[y] = make([]float64, width)
-		for x := 0; x < width; x++ {
-			sum := float64(0)
-			for i := 0; i < len(kernel); i++ {
-				for j := 0; j < len(kernel); j++ {
-					if x+i-len(kernel)/2 >= 0 && y+j-len(kernel)/2 >= 0 && x+i-len(kernel)/2 < width && y+j-len(kernel)/2 < height {
-						sum += img[y+j-len(kernel)/2][x+i-len(kernel)/2] * kernel[i][j]
-					}
-				}
-			}
-			result[y][x] = sum
-		}
-	}
-	return result
-}
-
 func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int, wg *sync.WaitGroup, main int) {
 
 	height := len(imgRes)
 	width := len(imgRes[0])
-	//fmt.Printf("Paral : Routine %d, deb = %d, fin = %d, height = %d, matlen = %d\n", int(index), width_deb, width_fin, height, int(len(imgRes)))
 
 	for y := 0; y < height; y++ {
 		for x := width_deb; x < width_fin; x++ {
@@ -83,7 +61,6 @@ func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, widt
 }
 
 func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxChan []float64) {
-	//fmt.Printf("Sobel : Routine : %f, deb : %d, fin : %d \n", index, width_deb, width_fin)
 	var wg_sobel sync.WaitGroup
 	x_sobel := [][]float64{
 		{1, 0, -1},
@@ -113,7 +90,7 @@ func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxCha
 
 	max_value := float64(0)
 	for y := 0; y < height; y++ {
-		for x := width_deb; x < width_fin; x++ {
+		for x := width_deb; x < width_fin-1; x++ {
 			valX := sumX[y][x]
 			valY := sumY[y][x]
 			gradiant := float64(math.Sqrt(valX*valX + valY*valY))
@@ -130,37 +107,7 @@ func sobel(img [][]float64, result [][]float64, width_deb, width_fin int, maxCha
 	}
 }
 
-func normalize(result [][]float64, max_valueChan []float64) {
-
-	max_value := max_valueChan[0]
-	for _, value := range max_valueChan {
-		if value > max_value {
-			max_value = value
-		}
-	}
-
-	for y := 0; y < len(result); y++ {
-		for x := 0; x < len(result[0]); x++ {
-			result[y][x] = result[y][x] / max_value
-		}
-	}
-}
-func suppressNonMax(matrix [][]float64, tolerance float64) {
-	// Initialisation des valeurs
-	width := len(matrix[0])
-	height := len(matrix)
-
-	// Vérification du rapport des pixels au max (1 car 100%) et la tolérance
-	for i := 0; i < height; i++ {
-		for j := 0; j < width; j++ {
-			if matrix[i][j] < (1 - tolerance) {
-				matrix[i][j] = 0
-			}
-		}
-	}
-}
-
-func contouring(matrix [][]float64, result [][]float64, lowerThreshold float64, highThreshold float64, width_deb, width_fin int, wg *sync.WaitGroup) {
+func contouring(matrix [][]float64, result [][]float64, lowerThreshold, highThreshold, max_value, tolerance float64, width_deb, width_fin int, wg *sync.WaitGroup) {
 	// Initialisation des constantes
 	height := len(matrix)
 
@@ -168,7 +115,8 @@ func contouring(matrix [][]float64, result [][]float64, lowerThreshold float64, 
 	for i := 1; i < height-1; i++ {
 		for j := width_deb; j < width_fin+1; j++ {
 
-			if matrix[i][j] < lowerThreshold {
+			// comparaison avec les thresholds + suppression non max
+			if matrix[i][j] < lowerThreshold || matrix[i][j] < (max_value*(1-tolerance)) {
 				result[i][j] = 0
 
 			} else if matrix[i][j] > highThreshold {
@@ -192,24 +140,6 @@ func contouring(matrix [][]float64, result [][]float64, lowerThreshold float64, 
 	defer wg.Done()
 }
 
-func resize(matrix [][]float64) [][]float64 {
-	// Initialisation des valeurs nécessaires
-	width := len(matrix[0])
-	height := len(matrix)
-
-	line := make([]float64, width+2)
-
-	// Ajout des contours à la matrice
-	for i := 0; i < height; i++ {
-		matrix[i] = append(matrix[i], 0)
-		matrix[i] = append([]float64{0}, matrix[i]...)
-	}
-	matrix = append(matrix, [][]float64{line}...)
-	matrix = append([][]float64{line}, matrix...)
-
-	return matrix
-}
-
 func read_img(imageFournie string) image.Image {
 	// Ouvrir le fichier image
 	imageFile, err := os.Open(imageFournie)
@@ -217,7 +147,7 @@ func read_img(imageFournie string) image.Image {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer imageFile.Close() //defer signifie qu'on retarde imageFile.Close jusqu'à ce que la fonction main soit terminée
+	defer imageFile.Close() //On attends qu'open finisse de s'exécuter avant de close
 
 	// Décode l'image
 	img, _, err := image.Decode(imageFile)
@@ -242,7 +172,6 @@ func write_img(img string, matrix [][]float64) {
 	}
 
 	// Création d'un fichier image PNG
-
 	file, err := os.Create(img)
 	if err != nil {
 		log.Fatal(err)
@@ -270,32 +199,6 @@ func rgb_to_grayscale_paral(img image.Image, grayMatrix [][]float64, height, wid
 
 		}
 	}
-
-}
-func rgb_to_grayscale(img image.Image) [][]float64 {
-	bounds := img.Bounds()
-	width, height := bounds.Max.X, bounds.Max.Y
-
-	//conversion en gray scale using 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue formula per pixel
-	grayMatrix := make([][]float64, height)
-	for i := range grayMatrix {
-		grayMatrix[i] = make([]float64, width)
-	}
-
-	const cstred float64 = 0.299   //constante red
-	const cstgreen float64 = 0.587 //constante green
-	const cstblue float64 = 0.114  //constante blue
-
-	// Parcours de tous les pixels de l'image et stockage des valeurs R, G, B dans la matrice
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			r, g, b, _ := img.At(x, y).RGBA()
-			grayMatrix[y][x] = cstred*float64(r>>8) + cstgreen*float64(g>>8) + cstblue*float64(b>>8)
-
-		}
-	}
-
-	return grayMatrix
 }
 
 func worker(img image.Image, grayMatrix, imgGauss, imgGrad, kernel [][]float64, max_valueChan []float64, height, width int, i, threads float64, keypointer *sync.WaitGroup) {
@@ -322,7 +225,10 @@ func main() {
 
 	// Paramètres de fonctions
 	kernelSize := 5
-	sigma := float64(1.4)
+	sigma := 1.4
+	tolerance := 0.8
+	minThreshold := 0.1
+	maxThreshold := 0.4
 
 	// Elements fixes de fonctions
 	kernel := generateGaussianFilter(kernelSize, sigma)
@@ -332,15 +238,15 @@ func main() {
 	grayMatrix := make([][]float64, height)
 	imgGauss := make([][]float64, height)
 	imgRes := make([][]float64, height+2)
-	imgGrad := make([][]float64, height)
+	imgGrad := make([][]float64, height+2)
 
 	// Initalisation des matrices
 	for i := 0; i < height; i++ {
 		grayMatrix[i] = make([]float64, width)
 		imgGauss[i] = make([]float64, width)
-		imgGrad[i] = make([]float64, width)
 	}
 	for j := 0; j < height+2; j++ {
+		imgGrad[j] = make([]float64, width+2)
 		imgRes[j] = make([]float64, width+2)
 	}
 	// Variables de threads
@@ -360,20 +266,22 @@ func main() {
 	// Need to wait for full image
 	wg.Wait()
 
-	normalize(imgGrad, max_valueChan)
-	resize(imgGrad)
-	suppressNonMax(imgGrad, 0.7)
+	// Recupération de la valeur maximale
+	max_value := max_valueChan[0]
+	for _, value := range max_valueChan {
+		if value > max_value {
+			max_value = value
+		}
+	}
 
 	for i := float64(0); i < threads; i++ {
 		wg.Add(1)
-		go contouring(imgGrad, imgRes, 0.1, 0.2, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
+		go contouring(imgGrad, imgRes, minThreshold, maxThreshold, max_value, tolerance, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), &wg)
 	}
 	wg.Wait()
 
 	//Image writing
-	write_img("output/grayed.png", grayMatrix)
-
-	write_img("output/michel.png", imgRes)
+	write_img("output/output.png", imgRes)
 
 	// See time
 	elapsed := time.Since(start)
