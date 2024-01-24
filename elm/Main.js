@@ -6629,11 +6629,18 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$html$Html$Attributes$rows = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'rows',
+		$elm$core$String$fromInt(n));
+};
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$li = _VirtualDom_node('li');
@@ -6669,7 +6676,7 @@ var $author$project$Main$meaningParsing = function (meanings) {
 				$elm$html$Html$li,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'font-size', '0.8em')
+						A2($elm$html$Html$Attributes$style, 'font-size', '0.9em')
 					]),
 				_List_fromArray(
 					[
@@ -6709,12 +6716,141 @@ var $author$project$Main$wordParsing = function (defs) {
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'width', '100%')
+			]),
 		_List_fromArray(
 			[
 				A2(
 				$elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'display', 'grid'),
+						A2($elm$html$Html$Attributes$style, 'float', 'left')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								_Utils_eq(model.u, model.w) ? A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'color', 'green'),
+										A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('You guessed it !')
+									])) : ((model.u === '') ? A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Type in your guess')
+									])) : A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'color', 'red'),
+										A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Try again !')
+									])))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$placeholder('Type your guess'),
+										$elm$html$Html$Attributes$value(model.u),
+										$elm$html$Html$Events$onInput($author$project$Main$ChangeInput)
+									]),
+								_List_Nil)
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$label,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$input,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$type_('checkbox'),
+												$elm$html$Html$Events$onClick($author$project$Main$SolChange)
+											]),
+										_List_Nil),
+										A2(
+										$elm$html$Html$span,
+										_List_fromArray(
+											[
+												A2($elm$html$Html$Attributes$style, 'padding', '5px'),
+												A2($elm$html$Html$Attributes$style, 'font-size', '0.9em')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('show the solution')
+											]))
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$Main$NewWord)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('New word')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$textarea,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$rows(10),
+										$elm$html$Html$Attributes$placeholder('You can take your notes here')
+									]),
+								_List_Nil)
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'padding-left', '50px'),
+						A2($elm$html$Html$Attributes$style, 'display', 'grid')
+					]),
 				_List_fromArray(
 					[
 						function () {
@@ -6749,127 +6885,29 @@ var $author$project$Main$view = function (model) {
 							default:
 								return $elm$html$Html$text('Bug in the code');
 						}
-					}()
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						function () {
-						var _v1 = model.x;
-						switch (_v1.$) {
-							case 0:
-								return $elm$html$Html$text('Could not get a definition');
-							case 1:
-								return $elm$html$Html$text('Data is loading');
-							case 3:
-								var def = _v1.a;
-								return A2(
-									$elm$html$Html$ol,
-									_List_Nil,
-									$author$project$Main$wordParsing(def));
-							default:
-								return $elm$html$Html$text('Bug in the code');
-						}
-					}()
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						_Utils_eq(model.u, model.w) ? A2(
-						$elm$html$Html$span,
-						_List_fromArray(
-							[
-								A2($elm$html$Html$Attributes$style, 'color', 'green'),
-								A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('You guessed it !')
-							])) : ((model.u === '') ? A2(
-						$elm$html$Html$span,
-						_List_fromArray(
-							[
-								A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Type in your guess')
-							])) : A2(
-						$elm$html$Html$span,
-						_List_fromArray(
-							[
-								A2($elm$html$Html$Attributes$style, 'color', 'red'),
-								A2($elm$html$Html$Attributes$style, 'font-weight', 'bold')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Try again !')
-							])))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
+					}(),
 						A2(
-						$elm$html$Html$input,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$placeholder('Type your guess'),
-								$elm$html$Html$Attributes$value(model.u),
-								$elm$html$Html$Events$onInput($author$project$Main$ChangeInput)
-							]),
-						_List_Nil)
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$label,
+						$elm$html$Html$div,
 						_List_Nil,
 						_List_fromArray(
 							[
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$type_('checkbox'),
-										$elm$html$Html$Events$onClick($author$project$Main$SolChange)
-									]),
-								_List_Nil),
-								A2(
-								$elm$html$Html$span,
-								_List_fromArray(
-									[
-										A2($elm$html$Html$Attributes$style, 'padding', '5px'),
-										A2($elm$html$Html$Attributes$style, 'font-size', '0.9em')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('show the solution')
-									]))
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$NewWord)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('New word')
+								function () {
+								var _v1 = model.x;
+								switch (_v1.$) {
+									case 0:
+										return $elm$html$Html$text('Could not get a definition');
+									case 1:
+										return $elm$html$Html$text('Data is loading');
+									case 3:
+										var def = _v1.a;
+										return A2(
+											$elm$html$Html$ol,
+											_List_Nil,
+											$author$project$Main$wordParsing(def));
+									default:
+										return $elm$html$Html$text('Bug in the code');
+								}
+							}()
 							]))
 					]))
 			]));

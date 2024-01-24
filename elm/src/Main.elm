@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, Attribute, text, pre, div, input, button, label, span, li, ul, ol)
+import Html exposing (Html, Attribute, text, pre, div, input, button, label, span, li, ul, ol, textarea)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Http
@@ -139,8 +139,28 @@ extract_from_list lst indice = case indice of
 
 view : Model -> Html Msg
 view model =
-  div [] [
-  div [] [ case model.file of
+  div [style "width" "100%"] [
+
+    div [style "display" "grid", style "float" "left"] [
+
+    div [] [ if model.userWord == model.word then 
+      span [style "color" "green", style "font-weight" "bold"][text "You guessed it !"]
+    else if model.userWord == "" then 
+      span [style "font-weight" "bold"] [text "Type in your guess" ]
+    else 
+      span [style "color" "red", style "font-weight" "bold"] [ text "Try again !" ]]
+
+    , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
+
+    , div [] [ label [] [ input [type_ "checkbox", onClick SolChange] []  , span [style "padding" "5px", style "font-size" "0.9em"] [text "show the solution" ] ] ]
+
+    , div [] [ button [ onClick NewWord ] [text "New word"] ]
+
+    , div [] [ textarea [ rows 10, placeholder "You can take your notes here"] [] ]
+
+    ]
+
+  , div [style "padding-left" "50px", style "display" "grid"] [ case model.file of
     Failure ->
       text "I was unable to load your book."
 
@@ -155,8 +175,6 @@ view model =
 
     SuccessDef _ -> 
       text "Bug in the code"
-    
-  ]
   , div [] [
     case model.definition of 
       Failure -> 
@@ -170,21 +188,7 @@ view model =
 
       Success _ -> 
         text "Bug in the code"
-    ]
-
-  , div [] [ if model.userWord == model.word then 
-    span [style "color" "green", style "font-weight" "bold"][text "You guessed it !"]
-  else if model.userWord == "" then 
-    span [style "font-weight" "bold"] [text "Type in your guess" ]
-  else 
-    span [style "color" "red", style "font-weight" "bold"] [ text "Try again !" ]]
-
-  , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
-
-  , div [] [ label [] [ input [type_ "checkbox", onClick SolChange] []  , span [style "padding" "5px", style "font-size" "0.9em"] [text "show the solution" ] ] ]
-
-  , div [] [ button [ onClick NewWord ] [text "New word"] ] ]
-
+    ] ] ]
     
 
 
