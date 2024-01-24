@@ -149,9 +149,9 @@ view model =
 
     Success _ ->
       if model.solution then 
-        label [style "font-weight" "bold", style "font-size" "3em"] [ text model.word ]
+        span [style "font-weight" "bold", style "font-size" "3em"] [ text model.word ]
       else 
-        label [style "font-weight" "bold", style "font-size" "3em"] [ text "Guess it" ]
+        span [style "font-weight" "bold", style "font-size" "3em"] [ text "Guess it" ]
 
     SuccessDef _ -> 
       text "Bug in the code"
@@ -173,13 +173,16 @@ view model =
     ]
 
   , div [] [ if model.userWord == model.word then 
-    label [style "color" "green", style "font-weight" "bold"][text "You guessed it !"]
+    span [style "color" "green", style "font-weight" "bold"][text "You guessed it !"]
   else if model.userWord == "" then 
-    label [][text "Type in your guess" ]
+    span [style "font-weight" "bold"] [text "Type in your guess" ]
   else 
-    label [style "color" "red"] [ text "Try again !" ]]
+    span [style "color" "red", style "font-weight" "bold"] [ text "Try again !" ]]
+
   , div [] [ input [ placeholder "Type your guess", value model.userWord, onInput ChangeInput ] [] ] 
-  , label [style "padding" "7.5px", style "font-size" "0.90em"] [ input [type_ "checkbox", onClick SolChange] []  , span [style "padding" "7.5px"] [text "show the solution" ]]
+
+  , div [] [ label [] [ input [type_ "checkbox", onClick SolChange] []  , span [style "padding" "5px", style "font-size" "0.9em"] [text "show the solution" ] ] ]
+
   , div [] [ button [ onClick NewWord ] [text "New word"] ] ]
 
     
@@ -216,10 +219,10 @@ wordParsing defs = case defs of
 
 meaningParsing : List Meaning -> List (Html Msg)
 meaningParsing meanings = case meanings of 
-  (x :: xs) -> (li [] [ text x.partOfSpeech, ol [] (definitionParsing x.definitions) ] :: meaningParsing xs)
+  (x :: xs) -> (li [style "font-size" "0.9em"] [ text x.partOfSpeech, ol [] (definitionParsing x.definitions) ] :: meaningParsing xs)
   [] -> []
 
 definitionParsing  : List String -> List (Html Msg)
 definitionParsing definitions = case definitions of 
-  (x :: xs) -> (li [] [text x]  :: definitionParsing xs)
+  (x :: xs) -> (li [style "padding" "10px", style "font-size" "1.1em"] [text x]  :: definitionParsing xs)
   [] -> []
