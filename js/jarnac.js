@@ -4,11 +4,16 @@ function draw(sac, n) {
   let letters = [];
   for (let i = 0; i < n; i++) {
     const element = n[i];
-    let nb_aleat = Math.floor(Math.random()*27);
-    if (sac[nb_aleat] !== 0) {
-      letters.push(nb_aleat);
-      sac[nb_aleat] -= 1;
+    let nb_aleat = Math.floor(Math.random()*26);
+    while (sac[nb_aleat] == 0) { 
+      let nb_aleat = Math.floor(Math.random()*26);
     }
+    letters.push(nb_aleat);
+    sac[nb_aleat] -= 1;
   }
   return letters
 }
+let carpet = draw(sac, 5)
+console.log(carpet)
+console.log(sac)
+console.log(carpet.map((letter) => String.fromCharCode(letter + 65)))
