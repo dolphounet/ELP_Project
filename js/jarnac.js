@@ -31,12 +31,36 @@ function log(file, data) {
   }
 }
 
+function anagram(newWord,word,carpet) {
+  // Initialisation
+  const res = true
+  newWord = newWord.toUpperCase()
+  word = word.toUpperCase()
+
+  // Test de la présence du mots dans la nouvelle propal
+  for (let i = 0; i < word.length; i++) {
+    if (!newWord.includes(word[i])){
+      res = false
+    };
+  }
+  // Test si les lettres restantes sont sur le tapis
+  remains = newWord.replace(word,'')
+  for(let i=0;i<6;i++) {
+    const letter = carpet[i];
+    if (remains.includes(letter)) {remains = remains.replace(letter,'')}
+  }
+  if (remains === '') {res = true}
+  
+  return res
+}
+
 let sac = [14, 4, 7, 5, 19, 2, 4, 2, 11, 1, 1, 6, 5, 9, 8, 4, 1, 10, 7, 9, 8, 2, 1, 1, 1, 2];
 let carpet = draw(sac, 5)
 console.log(carpet)
 console.log(sac)
 console.log(carpet.map((letter) => String.fromCharCode(letter + 65)))
-
+console.log([19,18,20,17,21].map((letter) => String.fromCharCode(letter + 65)))
+console.log(anagram("ruat","rat",[19,18,20,17,21].map((letter) => String.fromCharCode(letter + 65))))
 
 fileInit('log')
 
