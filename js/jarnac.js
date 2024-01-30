@@ -56,6 +56,7 @@ function anagram(newWord,word,carpet) {
 
 let sac = [14, 4, 7, 5, 19, 2, 4, 2, 11, 1, 1, 6, 5, 9, 8, 4, 1, 10, 7, 9, 8, 2, 1, 1, 1, 2];
 let carpet = draw(sac, 5)
+console.log("carpet")
 console.log(carpet)
 console.log(sac)
 console.log(carpet.map((letter) => String.fromCharCode(letter + 65)))
