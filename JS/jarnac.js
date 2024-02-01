@@ -1,18 +1,6 @@
 const { writeFile, appendFile } = require('node:fs/promises');
 
-function draw(sac, n) {
-  let letters = [];
-  for (let i = 0; i < n; i++) {
-    const element = n[i];
-    let nb_aleat = Math.floor(Math.random()*26);
-    while (sac[nb_aleat] == 0) { 
-      let nb_aleat = Math.floor(Math.random()*26);
-    }
-    letters.push(nb_aleat);
-    sac[nb_aleat] -= 1;
-  }
-  return letters
-}
+// ############## FICHIERS ##################
 
 function fileInit(file) {
   try {
@@ -29,6 +17,19 @@ function log(file, data) {
   } catch (error) {
     console.log("error", error.message)
   }
+}
+
+// ################ VERIF ####################
+
+function validstr(word){
+  let valid = false;
+  if (word.length>9){
+    console.log("le mot ne doit pas dépasser 9 caractères")
+  }
+  else{
+    valid = true;
+  }
+  return valid
 }
 
 function anagram(newWord,word,carpet) {
@@ -54,15 +55,25 @@ function anagram(newWord,word,carpet) {
   return res
 }
 
-function validstr(word){
-  let valid = false;
-  if (word.length>9){
-    console.log("le mot ne doit pas dépasser 9 caractères")
+function verifMot(newWord,word,carpet){
+  verified = anagram(newWord,word,carpet) && validstr(newWord)
+  return verified
+}
+
+// ########## GAME FUNCTIONS #################
+
+function draw(sac, n) {
+  let letters = [];
+  for (let i = 0; i < n; i++) {
+    const element = n[i];
+    let nb_aleat = Math.floor(Math.random()*26);
+    while (sac[nb_aleat] == 0) { 
+      let nb_aleat = Math.floor(Math.random()*26);
+    }
+    letters.push(nb_aleat);
+    sac[nb_aleat] -= 1;
   }
-  else{
-    valid = true;
-  }
-  return valid
+  return letters
 }
 
 function pointsCounter(grille){
@@ -73,6 +84,43 @@ function pointsCounter(grille){
   return points
 }
 
+function gameEnd(grilleA, grilleB){
+  if (grilleA[7]!="" || grilleB[7]!=""){
+    let game_over = true;
+    console.log("points de l'équipe A:",pointsCounter(grilleA))
+    console.log("points de l'équipe B:",pointsCounter(grilleB))
+  }
+  else{
+    console.log("le jeu continue")
+  }
+  return game_over
+}
+
+// ########### VISUELS ###########
+
+function affichage(grille,carpet,player){
+  let valid = 0;
+
+  // Affichage du tapis
+  console.log("Tapis du Joueur : "+String(player+1))
+  let strCarpet = ""
+  for (let i=0;i<carpet.length;i++){
+    strCarpet += " " + String.fromCharCode(carpet[i] + 65);
+  }
+  console.log(strCarpet + "\n")
+  // Affichage de la grille
+  console.log("Grille du joueur : "+String(player+1))
+  for (let i=0;i<8;i++){
+    if (grille[i]!=""){
+      valid ++;
+      console.log(String(i+1)+". : "+grille[i])
+    }
+  }
+  console.log(String(valid+1)+". : \n")
+  return valid
+}
+
+// ######## THE GAME ##############
 
 function game(){
   // Creation des objets de jeu
@@ -106,55 +154,18 @@ function game(){
 
       }
       
-      valid = affichage(grilles[joueur],carpets[joueur],joueur) // Afficher la grille et le tapis
+      valid = affichage(grilles[joueur],carpets[joueur],joueur) // Afficher la grille et le tapis,
 
       // Input : Proposer les endroits ou il peut jouer et demander ou il joue
       // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
+
       verified = verifMot()// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
+
       // Placer le nouveau mot, déduire du tapis les lettres utilisées
 
 
     }
   }*/
-}
-
-function verifMot(newWord,word,carpet){
-  verified = anagram(newWord,word,carpet)
-}
-
-function affichage(grille,carpet,player){
-  let valid = 0;
-
-  // Affichage du tapis
-  console.log("Tapis du Joueur : "+String(player+1))
-  let strCarpet = ""
-  for (let i=0;i<carpet.length;i++){
-    strCarpet += " " + String.fromCharCode(carpet[i] + 65);
-  }
-  console.log(strCarpet + "\n")
-  // Affichage de la grille
-  console.log("Grille du joueur : "+String(player+1))
-  for (let i=0;i<8;i++){
-    if (grille[i]!=""){
-      valid ++;
-      console.log(String(i+1)+". : "+grille[i])
-    }
-  }
-  console.log(String(valid+1)+". : \n")
-  return valid
-}
-
-
-function gameEnd(grilleA, grilleB){
-  if (grilleA[7]!="" || grilleB[7]!=""){
-    let game_over = true;
-    console.log("points de l'équipe A:",pointsCounter(grilleA))
-    console.log("points de l'équipe B:",pointsCounter(grilleB))
-  
-  }
-  else{
-    console.log("le jeu continue")
-  }
 }
 
 game()
