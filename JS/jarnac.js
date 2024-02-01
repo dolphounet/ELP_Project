@@ -1,21 +1,10 @@
 const { writeFile, appendFile } = require('node:fs/promises');
-var fs = require('fs');
+const fs = require('fs');
+const readline = require('readline-sync');
 
 
 
 // ############## FICHIERS ##################
-
-// Déclaration de la variable globale pour stocker dico
-var contenuFichier;
-
-// Lecture du dico et stockage de son contenu en var globale
-try {
-  contenuFichier = fs.readFileSync('liste_francais.txt', 'utf8');
-  console.log("Contenu du dictionnaire bien stocké dans la variable globale");
-  
-} catch (err) {
-  console.error("Erreur de lecture du fichier :", err);
-}
 
 
 function fileInit(file) {
@@ -58,7 +47,7 @@ function anagram(newWord,word,carpet) {
   // Test de la présence du mots dans la nouvelle propal
   for (let i = 0; i < word.length; i++) {
     if (!newWord.includes(word[i])){
-      res = false
+      res = false;
     };
   }
   // Test si les lettres restantes sont sur le tapis
@@ -109,7 +98,7 @@ function draw(sac, n) {
 function pointsCounter(grille){
   let points = 0;
   for(let i=0;i<8;i++) {
-    points = points + (grille[i].length)**2
+    points = points + (grille[i].length)**2;
   }
   return points
 }
@@ -117,11 +106,11 @@ function pointsCounter(grille){
 function gameEnd(grilleA, grilleB){
   if (grilleA[7]!="" || grilleB[7]!=""){
     let game_over = true;
-    console.log("points de l'équipe A:",pointsCounter(grilleA))
-    console.log("points de l'équipe B:",pointsCounter(grilleB))
+    console.log("points de l'équipe A:",pointsCounter(grilleA));
+    console.log("points de l'équipe B:",pointsCounter(grilleB));
   }
   else{
-    console.log("le jeu continue")
+    console.log("le jeu continue");
   }
   return game_over
 }
@@ -133,20 +122,20 @@ function affichage(grille,carpet,player){
 
   // Affichage du tapis
   console.log("Tapis du Joueur : "+String(player+1))
-  let strCarpet = ""
+  let strCarpet = "";
   for (let i=0;i<carpet.length;i++){
     strCarpet += " " + String.fromCharCode(carpet[i] + 65);
   }
-  console.log(strCarpet + "\n")
+  console.log(strCarpet + "\n");
   // Affichage de la grille
-  console.log("Grille du joueur : "+String(player+1))
+  console.log("Grille du joueur : "+String(player+1));
   for (let i=0;i<8;i++){
     if (grille[i]!=""){
       valid ++;
-      console.log(String(i+1)+". : "+grille[i])
+      console.log(String(i+1)+". : "+grille[i]);
     }
   }
-  console.log(String(valid+1)+". : \n")
+  console.log(String(valid+1)+". : \n");
   return valid
 }
 
@@ -173,38 +162,61 @@ function game(){
   // Exemple utilisation fonction verifMot
   console.log(verifmotinDico("dqsojdsq"));
 
-  affichage(grilles[joueur],carpets[joueur],joueur)
+  affichage(grilles[joueur],carpets[joueur],joueur);
 
-  /*
   // Boucle de jeu
   while (true){
     if (tour%2==0){
       // Input demander l'action du tour Jarnac (simple ou double) / jouer / arrêter
-      action = "Jouer".toLowerCase()
-      if (action == "jouer"){adversaire = 0}
-      else if (action == "jarnac"){adversaire = 1}
-      else {
-        tour ++
-
+      action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
+      if (action === "jouer"){adversaire = 0}
+      else if (action === "jarnac"){adversaire = 1}
+      else if (action === "arreter"){
+        tour ++;
+        break;
       }
+      else {
+        console.log("L'action n'existe pas.");
+        continue;
+      }
+
       
       valid = affichage(grilles[joueur],carpets[joueur],joueur) // Afficher la grille et le tapis,
 
       // Input : Proposer les endroits ou il peut jouer et demander ou il joue
+      position = readline.question("Où jouer (chiffre de 1 à 8) ? "); //À modifier pour pas que ce soit 8 mais la première ligne vide
       // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
-
-      verified = verifMot()// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
-
+      newWord = readline.question("Quel mot jouer ? ");
+      verified = verifMot(newWord, grilles[joueur][position], carpets[joueur])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
       // Placer le nouveau mot, déduire du tapis les lettres utilisées
+      if (verified) {
+        console.log("bon mot chakal");
+      }
+      else {
+        console.log("Le mot n'est pas valide !")
+      }
 
 
     }
-  }*/
+  }
 }
 
-game()
+// Déclaration de la variable globale pour stocker dico
+var contenuFichier;
 
-fileInit('log')
+// Lecture du dico et stockage de son contenu en var globale
+try {
+  contenuFichier = fs.readFileSync('liste_francais.txt', 'utf8');
+  console.log("Contenu du dictionnaire bien stocké dans la variable globale");
+  
+} catch (err) {
+  console.error("Erreur de lecture du fichier :", err);
+};
+
+
+game();
+
+fileInit('log');
 
 /*
 let sac = [14, 4, 7, 5, 19, 2, 4, 2, 11, 1, 1, 6, 5, 9, 8, 4, 1, 10, 7, 9, 8, 2, 1, 1, 1, 2];
