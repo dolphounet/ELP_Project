@@ -12,7 +12,7 @@ function fileInit(file) {
     writeFile(file, "");
     console.log("c'est bongue");
   } catch (error) {
-    console.log("erreur", error.message);
+    console.log("Erreur lors de l'initialisation du fichier :", error.message);
   };
 }
 
@@ -20,7 +20,7 @@ function log(file, data) {
   try {
     appendFile(file, data+"\n\r");
   } catch (error) {
-    console.log("error", error.message)
+    console.log("Erreur lors de l'écriture de log :", error.message);
   }
 }
 
@@ -29,7 +29,7 @@ function log(file, data) {
 function validstr(word){
   let valid = false;
   if (word.length>9){
-    console.log("le mot ne doit pas dépasser 9 caractères")
+    console.log("le mot ne doit pas dépasser 9 caractères");
   }
   else{
     valid = true;
@@ -40,29 +40,31 @@ function validstr(word){
 
 function anagram(newWord,word,carpet) {
   // Initialisation
-  const res = true
   newWord = newWord.toUpperCase()
   word = word.toUpperCase()
 
   // Test de la présence du mots dans la nouvelle propal
   for (let i = 0; i < word.length; i++) {
-    if (!newWord.includes(word[i])){
-      res = false;
-    };
+    if (newWord.includes(word[i])){
+      newWord = newWord.replace(word[i], '');
+    }
+    else {
+      return false
+    }
   }
+
   // Test si les lettres restantes sont sur le tapis
-  remains = newWord.replace(word,'')
   for(let i=0;i<6;i++) {
-    const letter = carpet[i];
-    if (remains.includes(letter)) {remains = remains.replace(letter,'')}
+    let letter = String.fromCharCode(carpet[i] + 65);
+    if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
   }
-  if (remains === '') {res = true}
   
-  return res
+  if (newWord !== '') {return false}
+  return true
 }
 
 function verifMot(newWord,word,carpet){
-  verified = anagram(newWord,word,carpet) && validstr(newWord)
+  verified = anagram(newWord,word,carpet) && validstr(newWord) && verifmotinDico(newWord);
   return verified
 }
 
@@ -173,7 +175,7 @@ function game(){
       else if (action === "jarnac"){adversaire = 1}
       else if (action === "arreter"){
         tour ++;
-        break;
+        continue;
       }
       else {
         console.log("L'action n'existe pas.");
@@ -181,19 +183,22 @@ function game(){
       }
 
       
-      valid = affichage(grilles[joueur],carpets[joueur],joueur) // Afficher la grille et le tapis,
+      valid = affichage(grilles[adversaire], carpets[adversaire], adversaire)+1 // Afficher la grille et le tapis,
 
       // Input : Proposer les endroits ou il peut jouer et demander ou il joue
-      position = readline.question("Où jouer (chiffre de 1 à 8) ? "); //À modifier pour pas que ce soit 8 mais la première ligne vide
+      position = readline.question('Où jouer (chiffre de 1 à ' + valid + ') ? ');
       // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
       newWord = readline.question("Quel mot jouer ? ");
-      verified = verifMot(newWord, grilles[joueur][position], carpets[joueur])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
+      verified = verifMot(newWord, grilles[joueur][position-1], carpets[joueur])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
       // Placer le nouveau mot, déduire du tapis les lettres utilisées
       if (verified) {
         console.log("bon mot chakal");
       }
       else {
-        console.log("Le mot n'est pas valide !")
+        console.log("Le mot n'est pas valide !");
+        console.log("Au tour du prochain joueur");
+        tour ++;
+        continue;
       }
 
 
