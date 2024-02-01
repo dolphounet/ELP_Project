@@ -6,7 +6,6 @@ const readline = require('readline-sync');
 
 // ############## FICHIERS ##################
 
-
 function fileInit(file) {
   try {
     writeFile(file, "");
@@ -37,8 +36,7 @@ function validstr(word){
   return valid
 }
 
-
-function anagram(newWord,word,carpet) {
+function anagram(word,newWord,carpet) {
   // Initialisation
   newWord = newWord.toUpperCase()
   word = word.toUpperCase()
@@ -68,18 +66,21 @@ function verifMot(newWord,word,carpet){
   return verified
 }
 
-
 // Fonction de vérification du mot dans le dictionnaire
 function verifmotinDico(mot) {
-    if (contenuFichier.includes(mot)) {
-        console.log("Le mot est bien présent dans le dictionnaire");
-        return true;
-    } else {
-        console.log("Le mot n'est pas présent dans le dictionnaire");
-        return false;
-    }
+  if (contenuFichier.includes(mot)) {
+      console.log("Le mot est bien présent dans le dictionnaire");
+      return true;
+  } else {
+      console.log("Le mot n'est pas présent dans le dictionnaire");
+      return false;
+  };
 }
 
+function verifMot(word,newWord,carpet){
+  verified = anagram(word,newWord,carpet) && validstr(newWord) && verifmotinDico(newWord);
+  return verified
+}
 
 // ########## GAME FUNCTIONS #################
 
@@ -90,30 +91,51 @@ function draw(sac, n) {
     let nb_aleat = Math.floor(Math.random()*26);
     while (sac[nb_aleat] == 0) { 
       let nb_aleat = Math.floor(Math.random()*26);
-    }
+    };
     letters.push(nb_aleat);
     sac[nb_aleat] -= 1;
-  }
+  };
   return letters
+}
+
+function placing(postion,word,newWord,carpet,grille,sac){
+  
+  // Remplacer
+  grille[postion] = newWord.toUpperCase();
+  remains = newWord.toUpperCase();
+  for (let i = 0; i < word.length; i++) {
+    if (newWord.includes(word[i])){
+      remains = remains.replace(word[i],'');
+    }
+  }
+  // Piocher de nouveau
+  for(let i=0;i<6;i++) {
+    const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
+    if (remains.includes(letter)){
+      remains = remains.replace(letter,'');
+      carpet[i] = draw(sac,1)[0];
+    }
+  }
 }
 
 function pointsCounter(grille){
   let points = 0;
   for(let i=0;i<8;i++) {
     points = points + (grille[i].length)**2;
-  }
+  };
   return points
 }
 
 function gameEnd(grilleA, grilleB){
+  let game_over = false
   if (grilleA[7]!="" || grilleB[7]!=""){
-    let game_over = true;
-    console.log("points de l'équipe A:",pointsCounter(grilleA));
-    console.log("points de l'équipe B:",pointsCounter(grilleB));
+    game_over = true;
+    console.log("points de l'équipe A:",pointsCounter(grilleA))
+    console.log("points de l'équipe B:",pointsCounter(grilleB))
   }
   else{
-    console.log("le jeu continue");
-  }
+    console.log("le jeu continue")
+  };
   return game_over
 }
 
@@ -141,8 +163,6 @@ function affichage(grille,carpet,player){
   return valid
 }
 
-
-
 // ######## THE GAME ##############
 
 function game(){
@@ -151,27 +171,25 @@ function game(){
   let tour = 0;
   let carpets = [draw(sac, 6),draw(sac,6)];
   let grilles = [
-    ["RAT","","","","","","",""],["NO","","","","","","",""]
+    ["a","e","c","d","q","a","aazdaz",""],["","","","","","","",""]
   ];
 
   // Variables de tour
   let joueur = 0;// Au début du tour
   let adversaire = 1;
   let valid = 0;
+  let playing = true;
 
   // Affichage de début de jeu
   console.log("Let's begin\n")
-  // Exemple utilisation fonction verifMot
-  console.log(verifmotinDico("dqsojdsq"));
-
-  affichage(grilles[joueur],carpets[joueur],joueur);
 
   // Boucle de jeu
-  while (true){
+  while (playing){
     if (tour%2==0){
+
       // Input demander l'action du tour Jarnac (simple ou double) / jouer / arrêter
       action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
-      if (action === "jouer"){adversaire = 0}
+      if (action === "jouer" || action === "j"){adversaire = 0}
       else if (action === "jarnac"){adversaire = 1}
       else if (action === "arreter"){
         tour ++;
@@ -182,26 +200,23 @@ function game(){
         continue;
       }
 
-      
-      valid = affichage(grilles[adversaire], carpets[adversaire], adversaire)+1 // Afficher la grille et le tapis,
-
+      // Affichage
+      valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 // Afficher la grille et le tapis,
       // Input : Proposer les endroits ou il peut jouer et demander ou il joue
       position = readline.question('Où jouer (chiffre de 1 à ' + valid + ') ? ');
       // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
       newWord = readline.question("Quel mot jouer ? ");
       verified = verifMot(newWord, grilles[joueur][position-1], carpets[joueur])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
       // Placer le nouveau mot, déduire du tapis les lettres utilisées
-      if (verified) {
-        console.log("bon mot chakal");
-      }
-      else {
-        console.log("Le mot n'est pas valide !");
-        console.log("Au tour du prochain joueur");
-        tour ++;
-        continue;
-      }
 
-
+      // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
+      if (!verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
+        console.log("Le mot n'est pas valide !")
+      }else{placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[adversaire],sac)}
+    
+      if (gameEnd(grilles[0],grilles[1])){
+        playing = false;
+      }
     }
   }
 }
