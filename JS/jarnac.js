@@ -32,6 +32,7 @@ function validstr(word){
   return valid
 }
 
+
 function anagram(newWord,word,carpet) {
   // Initialisation
   const res = true
@@ -59,6 +60,39 @@ function verifMot(newWord,word,carpet){
   verified = anagram(newWord,word,carpet) && validstr(newWord)
   return verified
 }
+
+var fs = require('fs');
+
+function verifMot(mot) {
+    return new Promise((resolve, reject) => {
+        // Lecture du fichier et stockage du contenu dans une variable
+        fs.readFile('liste_francais.txt', 'utf8', (err, data) => {
+            if (err) {
+                console.error("Erreur de lecture du fichier :", err);
+                reject(err); // Rejeter la promesse en cas d'erreur
+                return;
+            }
+            // Appeler la fonction de vérification une fois que le fichier est lu
+            resolve(testmotDico(mot, data));
+        });
+    });
+}
+
+function testmotDico(mot, contenuFichier) {
+    return contenuFichier.includes(mot);
+}
+
+// Utilisation de la fonction verifMot avec then() pour obtenir le résultat de la promesse
+verifMot("chocolat")
+    .then(resultat => {
+        if (resultat) {
+            console.log("Le mot est bien présent dans le dictionnaire");
+        } else {
+            console.log("Le mot n'est pas présent dans le dictionnaire");
+        }
+    })
+    .catch(err => console.error("Erreur :", err)); // Gérer les erreurs de la promesse
+
 
 // ########## GAME FUNCTIONS #################
 
@@ -119,6 +153,8 @@ function affichage(grille,carpet,player){
   console.log(String(valid+1)+". : \n")
   return valid
 }
+
+
 
 // ######## THE GAME ##############
 
