@@ -182,7 +182,7 @@ function game(){
   let adversaire = 1;
   let valid = 0;
   let playing = true;
-
+  let jarnac = 0
   // Affichage de début de jeu
   console.log("Let's begin\n")
 
@@ -191,10 +191,22 @@ function game(){
     // Input demander l'action du tour Jarnac (simple ou double) / jouer / arrêter
     joueur = tour%2;
     console.log("Joueur " + (joueur+1));
-    action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
-    if (action === "jouer" || action === "j"){adversaire = tour%2}
-    else if (action === "jarnac"){adversaire = (tour+1)%2}
+    if(jarnac <= 2 && tour != 0){
+      action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
+      while (!["jouer","j","arreter","jarnac"].includes(action)){
+        action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
+      }
+    }else{
+      action = readline.question("Action à jouer ce tour (jouer/arreter) ? ").toLowerCase();
+      while (!["jouer","j","arreter"].includes(action)){
+        action = readline.question("Action à jouer ce tour (jouer/arreter) ? ").toLowerCase();
+      }
+    }
+    
+    if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2}
+    else if (action === "jarnac"){adversaire = (tour+1)%2; jarnac++}
     else if (action === "arreter"){
+      jarnac ++;
       tour ++;
       continue;
     }
@@ -210,13 +222,13 @@ function game(){
     // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
     newWord = readline.question("Quel mot jouer ? ");
     verified = verifMot(newWord, grilles[adversaire][position-1], carpets[adversaire])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
-    // Placer le nouveau mot, déduire du tapis les lettres utilisées
+    
 
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
     if (!verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
       console.log("Le mot n'est pas valide !");
-    }else{
-      placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
+    }else if (action != jarnac){
+      placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
     }
   
     if (gameEnd(grilles[0],grilles[1])){
