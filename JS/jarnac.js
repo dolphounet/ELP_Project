@@ -1,6 +1,22 @@
 const { writeFile, appendFile } = require('node:fs/promises');
+var fs = require('fs');
+
+
 
 // ############## FICHIERS ##################
+
+// Déclaration de la variable globale pour stocker dico
+var contenuFichier;
+
+// Lecture du dico et stockage de son contenu en var globale
+try {
+  contenuFichier = fs.readFileSync('liste_francais.txt', 'utf8');
+  console.log("Contenu du dictionnaire bien stocké dans la variable globale");
+  
+} catch (err) {
+  console.error("Erreur de lecture du fichier :", err);
+}
+
 
 function fileInit(file) {
   try {
@@ -61,37 +77,17 @@ function verifMot(newWord,word,carpet){
   return verified
 }
 
-var fs = require('fs');
 
-function verifMot(mot) {
-    return new Promise((resolve, reject) => {
-        // Lecture du fichier et stockage du contenu dans une variable
-        fs.readFile('liste_francais.txt', 'utf8', (err, data) => {
-            if (err) {
-                console.error("Erreur de lecture du fichier :", err);
-                reject(err); // Rejeter la promesse en cas d'erreur
-                return;
-            }
-            // Appeler la fonction de vérification une fois que le fichier est lu
-            resolve(testmotDico(mot, data));
-        });
-    });
+// Fonction de vérification du mot dans le dictionnaire
+function verifmotinDico(mot) {
+    if (contenuFichier.includes(mot)) {
+        console.log("Le mot est bien présent dans le dictionnaire");
+        return true;
+    } else {
+        console.log("Le mot n'est pas présent dans le dictionnaire");
+        return false;
+    }
 }
-
-function testmotDico(mot, contenuFichier) {
-    return contenuFichier.includes(mot);
-}
-
-// Utilisation de la fonction verifMot avec then() pour obtenir le résultat de la promesse
-verifMot("chocolat")
-    .then(resultat => {
-        if (resultat) {
-            console.log("Le mot est bien présent dans le dictionnaire");
-        } else {
-            console.log("Le mot n'est pas présent dans le dictionnaire");
-        }
-    })
-    .catch(err => console.error("Erreur :", err)); // Gérer les erreurs de la promesse
 
 
 // ########## GAME FUNCTIONS #################
@@ -174,6 +170,8 @@ function game(){
 
   // Affichage de début de jeu
   console.log("Let's begin\n")
+  // Exemple utilisation fonction verifMot
+  console.log(verifmotinDico("dqsojdsq"));
 
   affichage(grilles[joueur],carpets[joueur],joueur)
 
