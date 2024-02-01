@@ -26,14 +26,15 @@ function log(file, data) {
 // ################ VERIF ####################
 
 function validstr(word){
-  let valid = false;
   if (word.length>9){
-    console.log("le mot ne doit pas dépasser 9 caractères");
+    console.log("le mot ne doit pas dépasser 9 caractères.");
+    return false
   }
-  else{
-    valid = true;
+  else if (word.length < 3){
+    console.log("Le mot doit être supérieur à trois caractères.");
+    return false
   }
-  return valid
+  return true;
 }
 
 function anagram(word,newWord,carpet) {
@@ -62,8 +63,7 @@ function anagram(word,newWord,carpet) {
 }
 
 function verifMot(newWord,word,carpet){
-  verified = anagram(newWord,word,carpet) && validstr(newWord) && verifmotinDico(newWord);
-  return verified
+  return anagram(newWord,word,carpet) && validstr(newWord) && verifmotinDico(newWord)
 }
 
 // Fonction de vérification du mot dans le dictionnaire
@@ -101,21 +101,24 @@ function draw(sac, n) {
 function placing(postion,word,newWord,carpet,grille,sac){
   
   // Remplacer
-  grille[postion] = newWord.toUpperCase();
-  remains = newWord.toUpperCase();
+  newWord = newWord.toUpperCase();
+  grille[postion] = newWord;
   for (let i = 0; i < word.length; i++) {
     if (newWord.includes(word[i])){
-      remains = remains.replace(word[i],'');
+      newWord = newWord.replace(word[i],'');
     }
   }
   // Piocher de nouveau
+  console.log(carpet, newWord)
   for(let i=0;i<6;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
-    if (remains.includes(letter)){
-      remains = remains.replace(letter,'');
+    if (newWord.includes(letter)){
+      console.log(letter)
+      newWord = newWord.replace(letter,'');
       carpet[i] = draw(sac,1)[0];
     }
   }
+  console.log(carpet)
 }
 
 function pointsCounter(grille){
@@ -185,38 +188,39 @@ function game(){
 
   // Boucle de jeu
   while (playing){
-    if (tour%2==0){
+    // Input demander l'action du tour Jarnac (simple ou double) / jouer / arrêter
+    joueur = tour%2;
+    console.log("Joueur " + (joueur+1));
+    action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
+    if (action === "jouer" || action === "j"){adversaire = tour%2}
+    else if (action === "jarnac"){adversaire = (tour+1)%2}
+    else if (action === "arreter"){
+      tour ++;
+      continue;
+    }
+    else {
+      console.log("L'action n'existe pas.");
+      continue;
+    }
 
-      // Input demander l'action du tour Jarnac (simple ou double) / jouer / arrêter
-      action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
-      if (action === "jouer" || action === "j"){adversaire = 0}
-      else if (action === "jarnac"){adversaire = 1}
-      else if (action === "arreter"){
-        tour ++;
-        continue;
-      }
-      else {
-        console.log("L'action n'existe pas.");
-        continue;
-      }
+    // Affichage
+    valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 // Afficher la grille et le tapis,
+    // Input : Proposer les endroits ou il peut jouer et demander ou il joue
+    position = readline.question('Où jouer (chiffre de 1 à ' + valid + ') ? ');
+    // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
+    newWord = readline.question("Quel mot jouer ? ");
+    verified = verifMot(newWord, grilles[adversaire][position-1], carpets[adversaire])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
+    // Placer le nouveau mot, déduire du tapis les lettres utilisées
 
-      // Affichage
-      valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 // Afficher la grille et le tapis,
-      // Input : Proposer les endroits ou il peut jouer et demander ou il joue
-      position = readline.question('Où jouer (chiffre de 1 à ' + valid + ') ? ');
-      // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
-      newWord = readline.question("Quel mot jouer ? ");
-      verified = verifMot(newWord, grilles[joueur][position-1], carpets[joueur])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
-      // Placer le nouveau mot, déduire du tapis les lettres utilisées
-
-      // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
-      if (!verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
-        console.log("Le mot n'est pas valide !")
-      }else{placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[adversaire],sac)}
-    
-      if (gameEnd(grilles[0],grilles[1])){
-        playing = false;
-      }
+    // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
+    if (!verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
+      console.log("Le mot n'est pas valide !");
+    }else{
+      placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
+    }
+  
+    if (gameEnd(grilles[0],grilles[1])){
+      playing = false;
     }
   }
 }
