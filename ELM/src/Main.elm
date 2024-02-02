@@ -60,7 +60,7 @@ init : () -> (Model, Cmd Msg)
 init _ =
   ( {file = Loading, textlist = [], userWord = "", word = "", numRandom = 1, solution = False,definition = Loading}
   ,Cmd.batch [Http.get
-      { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt"
+      { url = "https://raw.githubusercontent.com/dolphounet/ELP_Project/main/ELM/thousand_words_things_explainer.txt"
       , expect = Http.expectString GotText
       }, Random.generate NewNumber (Random.int 1 1000)]
   )
@@ -162,7 +162,7 @@ view model =
 
   , div [style "padding-left" "50px", style "display" "grid"] [ case model.file of
     Failure ->
-      text "I was unable to load your book."
+      text "I was unable to load your word list."
 
     Loading ->
       text "Loading..."
