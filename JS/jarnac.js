@@ -21,6 +21,39 @@ function draw(sac, n) {
   return letters
 }
 
+function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
+  // Init
+  newWord = newWord.toUpperCase();
+
+  // Virer de la grille de l'adversaire et décaler les trucs
+  grilles[adversaire][position] = "";
+  for (let i = position; i < grilles[adversaire].length-1; i++) {
+    if (grilles[adversaire][i+1] != ""){grilles[adversaire][i]=grilles[adversaire][i+1]}
+  }
+
+  console.log("trucmuche")
+  // Placer chez le joueur
+  for (let i=0;i<grilles[joueur];i++){
+    if (grilles[joueur][i]===""){grilles[joueur][i]=newWord}
+  }
+
+  // Remains
+  for (let i = 0; i < word.length; i++) {
+    if (newWord.includes(word[i])){
+      newWord = newWord.replace(word[i],'');
+    }
+  }
+
+  // Piocher de nouveau
+  for(let i=0;i<6;i++) {
+    const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
+    if (newWord.includes(letter)){
+      newWord = newWord.replace(letter,'');
+      carpet[i] = draw(sac,1)[0];
+    }
+  }
+}
+
 function placing(position,word,newWord,carpet,grille,sac){
   
   // Remplacer
@@ -42,37 +75,7 @@ function placing(position,word,newWord,carpet,grille,sac){
   }
 }
 
-function jarnac(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
-  // Init
-  newWord = newWord.toUpperCase();
 
-  // Virer de la grille de l'adversaire et décaler les trucs
-  grilles[adversaire][position] = "";
-  for (let i = position; i < grilles[adversaire].length-1; i++) {
-    if (grilles[adversaire][i+1] != ""){grilles[adversaire][i]=grilles[adversaire][i+1]}
-  }
-
-  // Placer chez le joueur
-  for (let i=0;i<grilles[joueur][position];i++){
-    if (grilles[joueur][i]===""){grilles[joueur][i]=newWord}
-  }
-
-  // Remains
-  for (let i = 0; i < word.length; i++) {
-    if (newWord.includes(word[i])){
-      newWord = newWord.replace(word[i],'');
-    }
-  }
-
-  // Piocher de nouveau
-  for(let i=0;i<6;i++) {
-    const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
-    if (newWord.includes(letter)){
-      newWord = newWord.replace(letter,'');
-      carpet[i] = draw(sac,1)[0];
-    }
-  }
-}
 
 function pointsCounter(grille){
   let points = 0;
@@ -189,6 +192,7 @@ function game(){
     else if (action === "quitter"){playing=false;console.log("Fermeture du jeu...");continue;}
     else {console.log("L'action n'existe pas.");continue;}
     
+    valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 
     // Placer un mot
     let position = 1
     if(valid!=1){checkValid = function(valid){let check=[];for(let i=0;i<valid;i++){check.push(String(i+1));};return check};position = input('Ou jouer (chiffre de 1 a ' + valid + ') ? ',checkValid(valid));}
@@ -197,11 +201,12 @@ function game(){
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
     if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
       console.log("Le mot n'est pas valide !");
-    }else if (action != jarnac){
+    }else if (action != "jarnac"){
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
     }
     else{
-      jarnac(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
+      
+      jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
     }
   
     if (gameEnd(grilles[0],grilles[1])){
