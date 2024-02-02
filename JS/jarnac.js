@@ -31,7 +31,7 @@ function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,s
 
   console.log("trucmuche")
   // Placer chez le joueur
-  for (let i=0;i<grilles[joueur];i++){
+  for (let i=0;i<grilles[joueur].length;i++){
     if (grilles[joueur][i]===""){grilles[joueur][i]=newWord}
   }
 
