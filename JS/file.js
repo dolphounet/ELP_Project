@@ -15,21 +15,23 @@ function file(){
     }
     fileInit("log")
     
-    async function log(file, data) {
-        try {
-        await appendFile(file, data + "\n\r");
-        } catch (error) {
-        console.log("Erreur lors de l'écriture de log :", error.message);
-        }
+    this.log = function (file, data) {
+        return new Promise((resolve, reject) => {
+            setImmediate(() => {
+                appendFile(file, data + "\n\r")
+                    .then()
+                    .catch((error) => reject(error));
+            });
+        });
+    };
+  
+    this.input = function (question,check){
+    answ = readline.question(question).toLowerCase();
+    while (!check.includes(answ)){
+      answ = readline.question(question).toLowerCase();
     }
-
-    this.input = function(question,check){
-        answ = readline.question(question).toLowerCase();
-        while (!check.includes(answ)){
-          answ = readline.question(question).toLowerCase();
-        }
-        return answ
+    return answ
     }
 }
 
-module.exports = file;
+module.exports = new file;
