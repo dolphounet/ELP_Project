@@ -1,6 +1,5 @@
 const fs = require('fs');
-var fileModule = require('./file');
-var file = new fileModule()
+var file = require('./file');
 
 // Déclaration de la variable globale pour stocker dico
 var contenuFichier;
@@ -21,10 +20,16 @@ function verifs(){
     function validstr(word){
         if (word.length>9){
         console.log("le mot ne doit pas dépasser 9 caractères.");
+        file.log("log", "Joueur " + joueur+1 + " : le mot ne doit pas dépasser 9 caractères")
+        .then(() => resolve())
+        .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
         return false
         }
         else if (word.length < 3){
         console.log("Le mot doit être supérieur à trois caractères.");
+        file.log("log", "Joueur " + joueur+1 + " : le mot doit être supérieur à trois caractères")
+        .then(() => resolve())
+        .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
         return false
         }
         return true;
@@ -58,19 +63,25 @@ function verifs(){
     // Fonction de vérification du mot dans le dictionnaire
     function verifmotinDico(mot){
 
-        let verified = false;
         if (contenuFichier.includes(mot)) {
             console.log("Le mot est bien présent dans le dictionnaire");
-            verified = true;
+        file.log("log", "Le mot est bien présent dans le dictionnaire")
+        .then(() => resolve())
+        .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+            return true;
         }
-        else {
-            console.log("Le mot n'est pas présent dans le dictionnaire");
-            avis = file.input("Acceptez-vous tout de meme ce mot ?(oui/non)",["oui","non"]);
-            if (avis==="oui"){
-                verified = true;
-            };
+        console.log("Le mot n'est pas présent dans le dictionnaire");
+        file.log("log", "Le mot n'est pas présent dans le dictionnaire")
+        .then(() => resolve())
+        .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+        avis = file.input("Acceptez-vous tout de meme ce mot ?(oui/non)",["oui","non"]);
+        if (avis==="oui"){
+          file.log("log", "Le mot est tout de même accepté par le joueur")
+          .then(() => resolve())
+          .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+          return true;
         };
-        return verified
+        return false
     };
     
     this.verifMot= function(word,newWord,carpet){
@@ -79,4 +90,4 @@ function verifs(){
     };
 }
 
-module.exports = verifs;
+module.exports = new verifs;

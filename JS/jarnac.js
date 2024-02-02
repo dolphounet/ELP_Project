@@ -1,8 +1,6 @@
 const readline = require('readline-sync');
-var verifsModule = require('./verifs');
-var verifs = new verifsModule()
-var fileModule = require('./file');
-var file = new fileModule()
+var verifs = require('./verifs');
+var file = require('./file');
 
 
 // ########## GAME FUNCTIONS #################
@@ -119,6 +117,9 @@ function game(){
     // Input demander l'action du tour Jarnac / jouer / arrêter
     if(jarnac <= 2 && tour != 0){action = file.input("Action a jouer ce tour (jouer/jarnac/arreter/quitter) ? ",["jouer","j","arreter","jarnac","quitter"]);}
     else{action = file.input("Action a jouer ce tour (jouer/arreter/quitter) ? ",["jouer","j","arreter","quitter"]);}
+    file.log("log", "Joueur " + (joueur+1) + " : " + action)
+    .then(() => resolve())
+    .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
     
     // Préparer le jeu en fonction de l'action
     if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2;}
@@ -132,13 +133,32 @@ function game(){
     
     // Placer un mot
     let position = 1
-    if(valid!=1){checkValid = function(valid){let check=[];for(let i=0;i<valid;i++){check.push(String(i+1));};return check};position = file.input('Ou jouer (chiffre de 1 a ' + valid + ') ? ',checkValid(valid));}
+    if(valid!=1){
+      checkValid = function(valid){
+        let check=[];
+        for(let i=0;i<valid;i++){
+          check.push(String(i+1));
+        };return check};
+      position = file.input('Ou jouer (chiffre de 1 a ' + valid + ') ? ',checkValid(valid));
+    }
+    file.log("log", "Joueur " + (joueur+1) + " : position : " + position)
+    .then(() => resolve())
+    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
     newWord = readline.question("Quel mot jouer ? ");
+    file.log("log", "Joueur " + (joueur+1) + " : mot : " + newWord)
+    .then(() => resolve())
+    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
   
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
     if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
       console.log("Le mot n'est pas valide !");
+      file.log("log", "Joueur " + (joueur+1) + " : action non valide")
+      .then(() => resolve())
+      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
     }else if (action != jarnac){
+      file.log("log", "Joueur " + (joueur+1) + " : action valide")
+      .then(() => resolve())
+      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
     }
   
