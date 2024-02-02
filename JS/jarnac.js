@@ -19,16 +19,49 @@ function draw(sac, n) {
   return letters
 }
 
-function placing(postion,word,newWord,carpet,grille,sac){
+function placing(position,word,newWord,carpet,grille,sac){
   
   // Remplacer
   newWord = newWord.toUpperCase();
-  grille[postion] = newWord;
+  grille[position] = newWord;
   for (let i = 0; i < word.length; i++) {
     if (newWord.includes(word[i])){
       newWord = newWord.replace(word[i],'');
     }
   }
+
+  // Piocher de nouveau
+  for(let i=0;i<6;i++) {
+    const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
+    if (newWord.includes(letter)){
+      newWord = newWord.replace(letter,'');
+      carpet[i] = draw(sac,1)[0];
+    }
+  }
+}
+
+function jarnac(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
+  // Init
+  newWord = newWord.toUpperCase();
+
+  // Virer de la grille de l'adversaire et décaler les trucs
+  grilles[adversaire][position] = "";
+  for (let i = position; i < grilles[adversaire].length-1; i++) {
+    if (grilles[adversaire][i+1] != ""){grilles[adversaire][i]=grilles[adversaire][i+1]}
+  }
+
+  // Placer chez le joueur
+  for (let i=0;i<grilles[joueur][position];i++){
+    if (grilles[joueur][i]===""){grilles[joueur][i]=newWord}
+  }
+
+  // Remains
+  for (let i = 0; i < word.length; i++) {
+    if (newWord.includes(word[i])){
+      newWord = newWord.replace(word[i],'');
+    }
+  }
+
   // Piocher de nouveau
   for(let i=0;i<6;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
@@ -84,6 +117,35 @@ function affichage(grille,carpet,player){
   return valid
 }
 
+function newAffichage(grille,carpet,player){
+  let valid = 0;
+
+  // Affichage du tapis
+  console.log("Tapis du Joueur : "+String(player+1))
+  let strCarpet = "";
+  for (let i=0;i<carpet.length;i++){
+    strCarpet += " " + String.fromCharCode(carpet[i] + 65);
+  }
+  console.log(strCarpet + "\n");
+  // Affichage de la grille
+  console.log("Grille du joueur : "+String(player+1));
+  for (let i=0;i<8;i++){
+    if (grille[i]!=""){
+      valid ++;
+      console.log(String(i+1)+". : "+grille[i]);
+    }
+  }
+  console.log(String(valid+1)+". : \n");
+  return valid
+}
+
+function input(question,check){
+  answ = readline.question(question).toLowerCase();
+  while (!check.includes(answ)){
+    answ = readline.question(question).toLowerCase();
+  }
+  return answ
+}
 
 // ######## THE GAME ##############
 
@@ -120,16 +182,12 @@ function game(){
     file.log("log", "Joueur " + (joueur+1) + " : " + action)
     .then(() => resolve())
     .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
-    
     // Préparer le jeu en fonction de l'action
     if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2;}
     else if (action === "jarnac"){adversaire = (tour+1)%2; jarnac++;}
     else if (action === "arreter"){jarnac = 0;tour ++;continue;}
     else if (action === "quitter"){playing=false;console.log("Fermeture du jeu...");continue;}
     else {console.log("L'action n'existe pas.");continue;}
-
-    // Affichage
-    valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 // Afficher la grille et le tapis,
     
     // Placer un mot
     let position = 1
@@ -138,7 +196,8 @@ function game(){
         let check=[];
         for(let i=0;i<valid;i++){
           check.push(String(i+1));
-        };return check};
+        };return check
+      };
       position = file.input('Ou jouer (chiffre de 1 a ' + valid + ') ? ',checkValid(valid));
     }
     file.log("log", "Joueur " + (joueur+1) + " : position : " + position)
@@ -160,6 +219,9 @@ function game(){
       .then(() => resolve())
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
+    }
+    else{
+      jarnac(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
     }
   
     if (gameEnd(grilles[0],grilles[1])){
