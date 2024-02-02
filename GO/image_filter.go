@@ -213,7 +213,7 @@ func main() {
 	start := time.Now()
 
 	// Gestion d'images
-	img := read_img("/home/maxence/Documents/Kath.png")
+	img := read_img(os.Args[1])
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
@@ -282,7 +282,7 @@ func main() {
 	wg.Wait()
 
 	//Image writing
-	write_img("output4.png", imgRes)
+	write_img("output.png", imgRes)
 
 	// See time
 	elapsed := time.Since(start)
