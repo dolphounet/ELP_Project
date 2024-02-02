@@ -6346,7 +6346,7 @@ var $author$project$Main$init = function (_v0) {
 					$elm$http$Http$get(
 					{
 						X: $elm$http$Http$expectString($author$project$Main$GotText),
-						aw: 'https://raw.githubusercontent.com/dolphounet/ELP_Project/main/elm/thousand_words_things_explainer.txt'
+						aw: 'https://raw.githubusercontent.com/dolphounet/ELP_Project/main/ELM/thousand_words_things_explainer.txt'
 					}),
 					A2(
 					$elm$random$Random$generate,
@@ -6857,7 +6857,7 @@ var $author$project$Main$view = function (model) {
 						var _v0 = model.C;
 						switch (_v0.$) {
 							case 0:
-								return $elm$html$Html$text('I was unable to load your book.');
+								return $elm$html$Html$text('I was unable to load your word list.');
 							case 1:
 								return $elm$html$Html$text('Loading...');
 							case 2:
