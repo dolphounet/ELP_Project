@@ -6,22 +6,23 @@ const readline = require('readline-sync');
 
 // ############## FICHIERS ##################
 
-function fileInit(file) {
+async function fileInit(file) {
   try {
-    writeFile(file, "");
+    await writeFile(file, "");
     console.log("c'est bongue");
   } catch (error) {
     console.log("Erreur lors de l'initialisation du fichier :", error.message);
-  };
+  }
 }
 
-function log(file, data) {
+async function log(file, data) {
   try {
-    appendFile(file, data+"\n\r");
+    await appendFile(file, data + "\n\r");
   } catch (error) {
     console.log("Erreur lors de l'écriture de log :", error.message);
   }
 }
+
 
 // ################ VERIF ####################
 
