@@ -37,7 +37,7 @@ func generateGaussianFilter(size int, sigma float64) [][]float64 {
 	return filter
 }
 
-func convolveParal(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int){
+func convolve(img [][]float64, imgRes [][]float64, kernel [][]float64, width_deb, width_fin int){
   height := len(img)
   width := len(img[0])
   for y := 0; y<height; y++{
@@ -65,8 +65,8 @@ func sobelInit(img [][]float64, sumX, sumY [][]float64, width_deb, width_fin int
     {0, 0, 0},
     {-1, -2, -1},
   }
-  convolveParal(img, sumX, x_sobel, width_deb, width_fin)
-  convolveParal(img, sumY, y_sobel, width_deb, width_fin)
+  convolve(img, sumX, x_sobel, width_deb, width_fin)
+  convolve(img, sumY, y_sobel, width_deb, width_fin)
 
 }
 func sobel(img [][]float64, result, sumX, sumY [][]float64, width_deb, width_fin int, maxChan []float64) {
@@ -168,7 +168,7 @@ func write_img(img string, matrix [][]float64) {
 	}
 }
 
-func rgb_to_grayscale_paral(img image.Image, grayMatrix [][]float64, width_deb, width_fin int) {
+func rgb_to_grayscale(img image.Image, grayMatrix [][]float64, width_deb, width_fin int) {
 
   height := len(grayMatrix)
 
@@ -192,18 +192,18 @@ func worker(img image.Image, grayMatrix, imgGauss, imgGrad, kernel, sumX, sumY [
   width := len(grayMatrix[0])
   offset := len(kernel)/2
   if i == threads-1 {
-    rgb_to_grayscale_paral(img, grayMatrix, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
-    convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
+    rgb_to_grayscale(img, grayMatrix, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
+    convolve(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
     sobelInit(imgGauss, sumX, sumY, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
     sobel(imgGauss, imgGrad, sumX, sumY, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), max_valueChan)
   }else if i == 0{
-    rgb_to_grayscale_paral(img, grayMatrix, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads))+offset+2)
-    convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads))+2)
+    rgb_to_grayscale(img, grayMatrix, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads))+offset+2)
+    convolve(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads))+2)
     sobelInit(imgGauss, sumX, sumY, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
     sobel(imgGauss, imgGrad, sumX, sumY, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), max_valueChan)
   }else {
-    rgb_to_grayscale_paral(img, grayMatrix, int(float64(width)*(i/threads))-offset-2, int(float64(width)*((i+1)/threads))+offset+2)
-    convolveParal(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads))-2, int(float64(width)*((i+1)/threads))+2)
+    rgb_to_grayscale(img, grayMatrix, int(float64(width)*(i/threads))-offset-2, int(float64(width)*((i+1)/threads))+offset+2)
+    convolve(grayMatrix, imgGauss, kernel, int(float64(width)*(i/threads))-2, int(float64(width)*((i+1)/threads))+2)
     sobelInit(imgGauss, sumX, sumY, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)))
     sobel(imgGauss, imgGrad, sumX, sumY, int(float64(width)*(i/threads)), int(float64(width)*((i+1)/threads)), max_valueChan)
   }
@@ -213,7 +213,7 @@ func main() {
 	start := time.Now()
 
 	// Gestion d'images
-	img := read_img("/home/maxence/Documents/Kath.png")
+	img := read_img(os.Args[1])
 
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
@@ -282,7 +282,7 @@ func main() {
 	wg.Wait()
 
 	//Image writing
-	write_img("output4.png", imgRes)
+	write_img("output.png", imgRes)
 
 	// See time
 	elapsed := time.Since(start)
