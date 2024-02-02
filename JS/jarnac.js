@@ -1,8 +1,8 @@
 const { writeFile, appendFile } = require('node:fs/promises');
 const fs = require('fs');
 const readline = require('readline-sync');
-
-
+var verifsModule = require('./verifs');
+var verifs = new verifsModule()
 
 // ############## FICHIERS ##################
 
@@ -24,48 +24,7 @@ async function log(file, data) {
 }
 
 
-// ################ VERIF ####################
-
-function validstr(word){
-  if (word.length>9){
-    console.log("le mot ne doit pas dépasser 9 caractères.");
-    return false
-  }
-  else if (word.length < 3){
-    console.log("Le mot doit être supérieur à trois caractères.");
-    return false
-  }
-  return true;
-}
-
-function anagram(word,newWord,carpet) {
-  // Initialisation
-  newWord = newWord.toUpperCase()
-  word = word.toUpperCase()
-
-  // Test de la présence du mots dans la nouvelle propal
-  for (let i = 0; i < word.length; i++) {
-    if (newWord.includes(word[i])){
-      newWord = newWord.replace(word[i], '');
-    }
-    else {
-      return false
-    }
-  }
-
-  // Test si les lettres restantes sont sur le tapis
-  for(let i=0;i<6;i++) {
-    let letter = String.fromCharCode(carpet[i] + 65);
-    if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
-  }
-  
-  if (newWord !== '') {return false}
-  return true
-}
-
-function verifMot(newWord,word,carpet){
-  return anagram(newWord,word,carpet) && validstr(newWord) && verifmotinDico(newWord)
-}
+// #### Verifs ####
 
 // Fonction de vérification du mot dans le dictionnaire
 function verifmotinDico(mot) {
@@ -85,7 +44,7 @@ function verifmotinDico(mot) {
 }
 
 function verifMot(word,newWord,carpet){
-  verified = anagram(word,newWord,carpet) && validstr(newWord) && verifmotinDico(newWord);
+  verified = verifs.anagram(word,newWord,carpet) && verifs.validstr(newWord) && verifmotinDico(newWord);
   return verified
 }
 
@@ -213,7 +172,7 @@ function game(){
     // Préparer le jeu en fonction de l'action
     if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2;}
     else if (action === "jarnac"){adversaire = (tour+1)%2; jarnac++;}
-    else if (action === "arreter"){jarnac ++;tour ++;continue;}
+    else if (action === "arreter"){jarnac = 0;tour ++;continue;}
     else if (action === "quitter"){playing=false;console.log("Fermeture du jeu...");continue;}
     else {console.log("L'action n'existe pas.");continue;}
 
