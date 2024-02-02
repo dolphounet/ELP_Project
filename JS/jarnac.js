@@ -122,7 +122,6 @@ function placing(postion,word,newWord,carpet,grille,sac){
     }
   }
   // Piocher de nouveau
-  console.log(carpet, newWord)
   for(let i=0;i<6;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
     if (newWord.includes(letter)){
@@ -131,7 +130,6 @@ function placing(postion,word,newWord,carpet,grille,sac){
       carpet[i] = draw(sac,1)[0];
     }
   }
-  console.log(carpet)
 }
 
 function pointsCounter(grille){
@@ -179,6 +177,14 @@ function affichage(grille,carpet,player){
   return valid
 }
 
+function input(question,check){
+  answ = readline.question(question).toLowerCase();
+  while (!check.includes(action)){
+    answ = readline.question(question).toLowerCase();
+  }
+  return answ
+}
+
 // ######## THE GAME ##############
 
 function game(){
@@ -204,34 +210,19 @@ function game(){
     // Input demander l'action du tour Jarnac (simple ou double) / jouer / arrêter
     joueur = tour%2;
     console.log("Joueur " + (joueur+1));
-    if(jarnac <= 2 && tour != 0){
-      action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
-      while (!["jouer","j","arreter","jarnac"].includes(action)){
-        action = readline.question("Action à jouer ce tour (jouer/jarnac/arreter) ? ").toLowerCase();
-      }
-    }else{
-      action = readline.question("Action à jouer ce tour (jouer/arreter) ? ").toLowerCase();
-      while (!["jouer","j","arreter"].includes(action)){
-        action = readline.question("Action à jouer ce tour (jouer/arreter) ? ").toLowerCase();
-      }
-    }
+    if(jarnac <= 2 && tour != 0){action = input("Action a jouer ce tour (jouer/jarnac/arreter/quitter) ? ",["jouer","j","arreter","jarnac","quitter"])}
+    else{action = input("Action a jouer ce tour (jouer/arreter/quitter) ? ",["jouer","j","arreter","quitter"])}
     
     if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2}
     else if (action === "jarnac"){adversaire = (tour+1)%2; jarnac++}
-    else if (action === "arreter"){
-      jarnac ++;
-      tour ++;
-      continue;
-    }
-    else {
-      console.log("L'action n'existe pas.");
-      continue;
-    }
+    else if (action === "arreter"){jarnac ++;tour ++;continue;}
+    else if (action === "quitter"){playing=false;console.log("Fermeture du jeu...");continue;}
+    else {console.log("L'action n'existe pas.");continue;}
 
     // Affichage
     valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 // Afficher la grille et le tapis,
     // Input : Proposer les endroits ou il peut jouer et demander ou il joue
-    position = readline.question('Où jouer (chiffre de 1 à ' + valid + ') ? ');
+    position = readline.question('Ou jouer (chiffre de 1 a ' + valid + ') ? ');
     // Bonus : Decouper les lettres dispos (affichage mais on verra plus tard)
     newWord = readline.question("Quel mot jouer ? ");
     verified = verifMot(newWord, grilles[adversaire][position-1], carpets[adversaire])// Verifier que l'input est valide (Longueur + rapport au mot + carpet)
@@ -266,28 +257,3 @@ try {
 game();
 
 fileInit('log');
-
-/*
-let sac = [14, 4, 7, 5, 19, 2, 4, 2, 11, 1, 1, 6, 5, 9, 8, 4, 1, 10, 7, 9, 8, 2, 1, 1, 1, 2];
-let carpet = draw(sac, 5)
-console.log("carpet")
-console.log(carpet)
-console.log(sac)
-console.log(carpet.map((letter) => String.fromCharCode(letter + 65)))
-console.log([19,18,20,17,21].map((letter) => String.fromCharCode(letter + 65)))
-console.log(anagram("ruat","rat",[19,18,20,17,21].map((letter) => String.fromCharCode(letter + 65))))
-*/
-
-/*
-const readline = require('node:readline');
-const { stdin: input, stdout: output } = require('node:process');
-
-const rl = readline.createInterface({ input, output });
-
-rl.question('What do you think of Node.js? ', (answer) => {
-  log('log', answer)
-  console.log(`Thank you for your valuable feedback: ${answer}`);
-
-  rl.close();
-});
-*/
