@@ -71,8 +71,21 @@ function verifmotinDico(mot) {
   if (contenuFichier.includes(mot)) {
       console.log("Le mot est bien présent dans le dictionnaire");
       return true;
-  } else {
+  } 
+  else {
       console.log("Le mot n'est pas présent dans le dictionnaire");
+      avis = readline.question("Acceptez-vous tout de meme ce mot ?(oui/non)").toLowerCase();
+      while (!["oui","non"].includes(avis)){
+        avis = readline.question("Acceptez-vous tout de meme ce mot ?(oui/non)").toLowerCase();
+      }
+      if (avis==="oui"){
+        return true
+
+      }
+      else if (avis=="non"){
+        return false 
+      }
+
       return false;
   };
 }
@@ -174,7 +187,7 @@ function game(){
   let tour = 0;
   let carpets = [draw(sac, 6),draw(sac,6)];
   let grilles = [
-    ["a","e","c","d","q","a","aazdaz",""],["","","","","","","",""]
+    ["","","","","","","",""],["","","","","","","",""]
   ];
 
   // Variables de tour
