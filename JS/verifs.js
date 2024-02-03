@@ -39,7 +39,7 @@ function verifs(){
     };
 
         // Test si les lettres restantes sont sur le tapis
-      for(let i=0;i<6;i++) {
+      for(let i=0;i<carpet.length;i++) {
         let letter = String.fromCharCode(carpet[i] + 65);
         if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
       };
