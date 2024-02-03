@@ -128,49 +128,49 @@ function affichage(grille,carpet,player){
 }
 
 function normaliseStr(string,length,separ){
-  for (let i=0;i<length-string.length;i++){
+  add = length-string.length
+  for (let i=0;i<add;i++){
     string += " "
   }
   return string + separ
 }
 
+
 function newAffichage(grilles,carpets,player){
 
   // Init
-  let valid = 0;
-  let separ = "    |    ";
-  let maxlenght = 21;
-  console.log("\n--------------- Tour du joueur"+ String(player) +" ----------------\n")
-  // Affichage du tapis
-  console.log(normaliseStr("Tapis du Joueur : 1",maxlenght,separ)+"Tapis du Joueur : 2")
+  let maxlenght = 28;
+  let begin = "   ║    "
+  let ext = "║   "
+  let separ = "     ║     ";
+  let valid = [1,1];
+  let strCarpet = ["",""];
+  let strGrille = "";
 
-  // Aled
-  let strCarpetA = "";
-  let strCarpetB = "";  
-  for (let i=0;i<6;i++){
-    strCarpetA += " " + String.fromCharCode(carpets[0][i] + 65);
-    strCarpetB += " " + String.fromCharCode(carpets[1] + 65);
+  for (let i=0;i<2;i++){for (let j=0;j<6;j++){strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);}}
+  for (let j=0;j<8;j++){
+    if (grilles[0][j]!=""){valid[0] ++;}
+    if (grilles[1][j]!=""){valid[1] ++;}
+    if (j!= 7){strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
+    else {strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
   }
-  console.log(normaliseStr(strCarpetA,maxlenght,separ)+strCarpetB + "\n");
+  console.log("   ╔═════════════════════════════════════════════════════════════╗")
+  console.log("   ║                      Tour du joueur "+String(player+1)+"                       ║")
+  console.log("   ╠═════════════════════════════╦═══════════════════════════════╣")
+  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
+  console.log(normaliseStr(begin + "Grille du joueur : 1",maxlenght,separ)+normaliseStr("Grille du joueur : 2",maxlenght-2,ext))
+  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
+  console.log(strGrille)
+  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
+  console.log("   ╠═════════════════════════════╬═══════════════════════════════╣")
+  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
+  console.log(normaliseStr(begin + " Tapis du Joueur : 1",maxlenght,separ)+normaliseStr(" Tapis du Joueur : 2",maxlenght-2,ext))
+  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
+  console.log(normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext));
+  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
+  console.log("   ╚═════════════════════════════╩═══════════════════════════════╝\n")
 
-  // Affichage de la grille
-  console.log(normaliseStr("Grille du joueur : 1",maxlenght,separ)+"Grille du joueur : 2")
-  for (let i=0;i<8;i++){
-    if (grille[i]!=""){
-      valid ++;
-      console.log(String(i+1)+". : "+grille[i]);
-    }
-  }
-  console.log(String(valid+1)+". : \n");
   return valid
-}
-
-function input(question,check){
-  answ = readline.question(question).toLowerCase();
-  while (!check.includes(answ)){
-    answ = readline.question(question).toLowerCase();
-  }
-  return answ
 }
 
 // ######## THE GAME ##############
@@ -187,7 +187,7 @@ function game(){
   // Variables de tour
   let joueur = 0;// Au début du tour
   let adversaire = 1;
-  let valid = 0;
+  let valid = [];
   let playing = true;
   let jarnac = 0
 
@@ -199,42 +199,38 @@ function game(){
     
     // Variable du joueur
     joueur = tour%2;
-    console.log("Joueur " + (joueur+1));
-    affichage(grilles[joueur],carpets[joueur],joueur)+1 
-    newAffichage(grilles,carpets,joueur)
+    valid = newAffichage(grilles,carpets,joueur)
 
     // Input demander l'action du tour Jarnac / jouer / arrêter
-    if(jarnac <= 2 && tour != 0){action = file.input("Action a jouer ce tour (jouer/jarnac/arreter/quitter) ? ",["jouer","j","arreter","jarnac","quitter"]);}
-    else{action = file.input("Action a jouer ce tour (jouer/arreter/quitter) ? ",["jouer","j","arreter","quitter"]);}
+    if(jarnac <= 2 && tour != 0){action = file.input("Action a jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
+    else{action = file.input("Action a jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);}
     file.log("log", "Joueur " + (joueur+1) + " : " + action)
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
+      .then(() => resolve())
+      .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
     // Préparer le jeu en fonction de l'action
     if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2;}
     else if (action === "jarnac"){adversaire = (tour+1)%2; jarnac++;}
-    else if (action === "arreter"){jarnac = 0;tour ++;continue;}
+    else if (action === "passer" || action === "p"){jarnac = 0;tour ++;continue;}
     else if (action === "quitter"){playing=false;console.log("Fermeture du jeu...");continue;}
     else {console.log("L'action n'existe pas.");continue;}
     
-    valid = affichage(grilles[adversaire],carpets[adversaire],adversaire)+1 
     // Placer un mot
     let position = 1
-    if(valid!=1){
-      checkValid = function(valid){
-        let check=[];
-        for(let i=0;i<valid;i++){
-          check.push(String(i+1));
-        };return check
-      };
-      position = file.input('Ou jouer (chiffre de 1 a ' + valid + ') ? ',checkValid(valid));
+
+    if(action != "jarnac"){
+      if (valid[adversaire]!=1){position = file.input('Ou jouer (chiffre de 1 a ' + valid[adversaire] + ') ? ',verifs.checkValid(valid[adversaire]));}
     }
+    else{
+      if (valid[adversaire]-1!=1){position = file.input('Ou jouer (chiffre de 1 a ' + valid[adversaire] + ') ? ',verifs.checkValid(valid[adversaire]));}
+    }
+    
     file.log("log", "Joueur " + (joueur+1) + " : position : " + position)
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      .then(() => resolve())
+      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
     newWord = readline.question("Quel mot jouer ? ");
     file.log("log", "Joueur " + (joueur+1) + " : mot : " + newWord)
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      .then(() => resolve())
+      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
   
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
     if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
