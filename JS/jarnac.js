@@ -65,7 +65,7 @@ function placing(position,word,newWord,carpet,grille,sac){
     }
   }
 
-  for(let i=0;i<6;i++) {
+  for(let i=0;i<carpet.length;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
     if (newWord.includes(letter)){
       newWord = newWord.replace(letter,'');
@@ -115,14 +115,22 @@ function newAffichage(grilles,carpets,player,jarnac){
   let separ = "     ║     ";
   let valid = [1,1];
   let strCarpet = ["",""];
-  let strGrille = "";
+  let strGrilles = "";
+  let strCarpets = "";
 
-  for (let i=0;i<2;i++){for (let j=0;j<6;j++){strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);}}
+  // CREATION UNE LIGNE
+  // normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext)
+  for (let i=0;i<2;i++){
+    for (let j=0;j<carpets[i].length;j++){
+      strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);
+    }
+  }
+
   for (let j=0;j<8;j++){
     if (grilles[0][j]!=""){valid[0] ++;}
     if (grilles[1][j]!=""){valid[1] ++;}
-    if (j!= 7){strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
-    else {strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
+    if (j!= 7){strGrilles +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
+    else {strGrilles +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
   }
   console.log("\n   ╔═════════════════════════════════════════════════════════════╗")
   console.log("   ║                      Tour du joueur "+String(player+1)+"                       ║")
@@ -130,13 +138,13 @@ function newAffichage(grilles,carpets,player,jarnac){
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log(normaliseStr(begin + "Grille du joueur : 1",maxlenght,separ)+normaliseStr("Grille du joueur : 2",maxlenght-2,ext))
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(strGrille)
+  console.log(strGrilles)
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log("   ╠═════════════════════════════╬═══════════════════════════════╣")
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log(normaliseStr(begin + " Tapis du Joueur : 1",maxlenght,separ)+normaliseStr(" Tapis du Joueur : 2",maxlenght-2,ext))
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext));
+  console.log(strCarpets);
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log("   ╠═════════════════════════════╩═══════════════════════════════╣")
   console.log("   ║                   Jarnac Possibles : " +String(jarnac) +"                      ║")
