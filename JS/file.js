@@ -8,14 +8,14 @@ function file(){
     async function fileInit(file) {
         try {
         await writeFile(file, "");
-        console.log("Fichier prêt !");
+        console.log("Fichier log prêt !");
         } catch (error) {
         console.log("Erreur lors de l'initialisation du fichier :", error.message);
         }
     }
     fileInit("log")
     
-    this.log = function (file, data) {
+    function log (file, data) {
         return new Promise((resolve, reject) => {
             setImmediate(() => {
                 appendFile(file, data + "\n\r")
@@ -25,12 +25,18 @@ function file(){
         });
     };
   
-    this.input = function (question,check){
-    answ = readline.question(question).toLowerCase();
-    while (!check.includes(answ)){
-      answ = readline.question(question).toLowerCase();
+    this.register = function (message){
+        log("log", message)
+        .then(() => resolve())
+        .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
     }
-    return answ
+
+    this.input = function (question,check){
+        answ = readline.question(question).toLowerCase();
+        while (!check.includes(answ)){
+        answ = readline.question(question).toLowerCase();
+        }
+        return answ
     }
 }
 
