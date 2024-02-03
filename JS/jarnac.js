@@ -22,7 +22,7 @@ function draw(sac, n) {
 function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
   // Init
   newWord = newWord.toUpperCase();
-
+  console.log("ici hein")
   // Virer de la grille de l'adversaire et décaler les trucs
   grilles[adversaire][position] = "";
   for (let i = position; i < grilles[adversaire].length-1; i++) {
@@ -31,8 +31,12 @@ function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,s
 
   console.log("trucmuche")
   // Placer chez le joueur
+  let fait = false
   for (let i=0;i<grilles[joueur].length;i++){
-    if (grilles[joueur][i]===""){grilles[joueur][i]=newWord}
+    if (grilles[joueur][i]==="" && fait==false) {
+      grilles[joueur][i]=newWord
+      fait = true
+    }
   }
 
   // Remains
@@ -50,6 +54,7 @@ function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,s
       carpet[i] = draw(sac,1)[0];
     }
   }
+  console.log("fin jarnacfunction")
 }
 
 function placing(position,word,newWord,carpet,grille,sac){
@@ -85,6 +90,8 @@ function pointsCounter(grille){
 
 function gameEnd(grilleA, grilleB){
   let game_over = false
+  console.log(grilleA)
+  console.log(grilleB)
   if (grilleA[7]!="" || grilleB[7]!=""){
     game_over = true;
     console.log("points de l'équipe A:",pointsCounter(grilleA))
@@ -218,7 +225,7 @@ function game(){
       file.log("log", "Joueur " + (joueur+1) + " : action non valide")
       .then(() => resolve())
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-    }else if (action != jarnac){
+    }else if (action != "jarnac"){
       file.log("log", "Joueur " + (joueur+1) + " : action valide")
       .then(() => resolve())
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
