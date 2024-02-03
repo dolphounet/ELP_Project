@@ -1,7 +1,7 @@
 const readline = require('readline-sync');
 var verifs = require('./verifs');
 var file = require('./file');
-
+var visuels = require('./visuels')
 
 // ########## GAME FUNCTIONS #################
 
@@ -106,70 +106,13 @@ function gameEnd(grilleA, grilleB){
   return game_over
 }
 
-// ########### VISUELS ###########
-
-function normaliseStr(string,length,separ){
-  add = length-string.length
-  for (let i=0;i<add;i++){
-    string += " "
-  }
-  return string + separ
-}
-
-function newAffichage(grilles,carpets,player,jarnac){
-
-  // Init
-  let maxlenght = 28;
-  let begin = "   ║    "
-  let ext = "║   "
-  let separ = "     ║     ";
-  let valid = [1,1];
-  let strCarpet = ["",""];
-  let strGrilles = "";
-  let strCarpets = "";
-
-  // CREATION UNE LIGNE
-  // normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext)
-  for (let i=0;i<2;i++){
-    for (let j=0;j<carpets[i].length;j++){
-      strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);
-    }
-  }
-
-  for (let j=0;j<8;j++){
-    if (grilles[0][j]!=""){valid[0] ++;}
-    if (grilles[1][j]!=""){valid[1] ++;}
-    if (j!= 7){strGrilles +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
-    else {strGrilles +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
-  }
-  console.log("\n   ╔═════════════════════════════════════════════════════════════╗")
-  console.log("   ║                      Tour du joueur "+String(player+1)+"                       ║")
-  console.log("   ╠═════════════════════════════╦═══════════════════════════════╣")
-  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(normaliseStr(begin + "Grille du joueur : 1",maxlenght,separ)+normaliseStr("Grille du joueur : 2",maxlenght-2,ext))
-  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(strGrilles)
-  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log("   ╠═════════════════════════════╬═══════════════════════════════╣")
-  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(normaliseStr(begin + " Tapis du Joueur : 1",maxlenght,separ)+normaliseStr(" Tapis du Joueur : 2",maxlenght-2,ext))
-  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(strCarpets);
-  console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log("   ╠═════════════════════════════╩═══════════════════════════════╣")
-  console.log("   ║                   Jarnac Possibles : " +String(jarnac) +"                      ║")
-  console.log("   ╚═════════════════════════════════════════════════════════════╝\n")
-
-  return valid
-}
-
 // ######## THE GAME ##############
 
 function game(){
   // Creation des objets de jeu
   let sac = [14, 4, 7, 5, 19, 2, 4, 2, 11, 1, 1, 6, 5, 9, 8, 4, 1, 10, 7, 9, 8, 2, 1, 1, 1, 2];
   let tour = 0;
-  let carpets = [draw(sac, 6),draw(sac,6)];
+  let carpets = [draw(sac,15),draw(sac,7)];
   let grilles = [
     ["","","","","","","",""],["","","","","","","",""]
   ];
@@ -199,7 +142,7 @@ function game(){
         carpets[joueur].push(draw(sac, 1)[0]);
       }
     }
-    valid = newAffichage(grilles,carpets,joueur,jarnac)
+    valid = visuels.Affichage(grilles,carpets,joueur,jarnac)
     jarnacCond = jarnac !== 0 && tour !== 0 && valid[(tour+1)%2]>1;
 
     if(jarnacCond && replace){action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter", 'remplacer', 'r']);}
