@@ -19,7 +19,7 @@ function draw(sac, n) {
   return letters
 }
 
-function drawOneCard(carpet, sac) {
+function drawOneLetter(carpet, sac) {
   let i = 0;
   while (carpet[i]!=32-65) {
     i++;
@@ -183,7 +183,7 @@ function game(){
     joueur = tour%2;
     if (tour != 0 && tour != 1) {
       if (carpets[joueur].includes(32-65)) {
-        drawOneCard(carpets[joueur], sac);
+        drawOneLetter(carpets[joueur], sac);
       }
       else{
         carpets[joueur].push(draw(sac, 1)[0]);
@@ -192,8 +192,6 @@ function game(){
     valid = newAffichage(grilles,carpets,joueur,jarnac)
     jarnacCond = jarnac !== 0 && tour !== 0 && valid[(tour+1)%2]>1;
 
-
-    // Input demander l'action du tour Jarnac / jouer / arrêter
     if(jarnacCond && replace){action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter", 'remplacer', 'r']);}
     else if(!jarnacCond && replace){action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter", 'remplacer', 'r']);}
     else if(jarnacCond && !replace){action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
@@ -246,7 +244,7 @@ function game(){
       .then(() => resolve())
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
-      drawOneCard(carpets[adversaire], sac);
+      drawOneLetter(carpets[adversaire], sac);
     }
     else{
       jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac);
