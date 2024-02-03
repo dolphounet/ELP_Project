@@ -19,6 +19,14 @@ function draw(sac, n) {
   return letters
 }
 
+function drawOneCard(carpet, sac) {
+  let i = 0;
+  while (carpet[i]!=32-65) {
+    i++;
+  };
+  carpet[i] = draw(sac, 1)[0];
+}
+
 function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
   // Init
   newWord = newWord.toUpperCase();
@@ -45,15 +53,15 @@ function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,s
       newWord = newWord.replace(word[i],'');
     }
   }
-
-  // Piocher de nouveau
+  /*
   for(let i=0;i<6;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
     if (newWord.includes(letter)){
       newWord = newWord.replace(letter,'');
-      carpet[i] = draw(sac,1)[0];
+      carpet[i] = -65;
     }
   }
+  */
   console.log("fin jarnacfunction")
 }
 
@@ -68,12 +76,11 @@ function placing(position,word,newWord,carpet,grille,sac){
     }
   }
 
-  // Piocher de nouveau
   for(let i=0;i<6;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
     if (newWord.includes(letter)){
       newWord = newWord.replace(letter,'');
-      carpet[i] = draw(sac,1)[0];
+      carpet[i] = 32-65;
     }
   }
 }
@@ -244,7 +251,9 @@ function game(){
       file.log("log", "Joueur " + (joueur+1) + " : action valide")
       .then(() => resolve())
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-      placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
+      placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
+      drawOneCard(carpets[adversaire], sac);
+      
     }
     else{
       
