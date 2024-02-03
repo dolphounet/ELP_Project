@@ -75,7 +75,7 @@ function placing(position,word,newWord,carpet,grille,sac){
     }
   }
 
-  for(let i=0;i<6;i++) {
+  for(let i=0;i<carpet.length;i++) {
     const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
     if (newWord.includes(letter)){
       newWord = newWord.replace(letter,'');
@@ -98,6 +98,7 @@ function gameEnd(grilleA, grilleB){
     game_over = true;
     console.log("points de l'équipe A:",pointsCounter(grilleA))
     console.log("points de l'équipe B:",pointsCounter(grilleB))
+    file.register("Fin du jeu")
   }
   else{
     console.log("le jeu continue")
@@ -124,14 +125,22 @@ function newAffichage(grilles,carpets,player,jarnac){
   let separ = "     ║     ";
   let valid = [1,1];
   let strCarpet = ["",""];
-  let strGrille = "";
+  let strGrilles = "";
+  let strCarpets = "";
 
-  for (let i=0;i<2;i++){for (let j=0;j<6;j++){strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);}}
+  // CREATION UNE LIGNE
+  // normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext)
+  for (let i=0;i<2;i++){
+    for (let j=0;j<carpets[i].length;j++){
+      strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);
+    }
+  }
+
   for (let j=0;j<8;j++){
     if (grilles[0][j]!=""){valid[0] ++;}
     if (grilles[1][j]!=""){valid[1] ++;}
-    if (j!= 7){strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
-    else {strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
+    if (j!= 7){strGrilles +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
+    else {strGrilles +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
   }
   console.log("\n   ╔═════════════════════════════════════════════════════════════╗")
   console.log("   ║                      Tour du joueur "+String(player+1)+"                       ║")
@@ -139,13 +148,13 @@ function newAffichage(grilles,carpets,player,jarnac){
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log(normaliseStr(begin + "Grille du joueur : 1",maxlenght,separ)+normaliseStr("Grille du joueur : 2",maxlenght-2,ext))
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(strGrille)
+  console.log(strGrilles)
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log("   ╠═════════════════════════════╬═══════════════════════════════╣")
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log(normaliseStr(begin + " Tapis du Joueur : 1",maxlenght,separ)+normaliseStr(" Tapis du Joueur : 2",maxlenght-2,ext))
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log(normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext));
+  console.log(strCarpets);
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log("   ╠═════════════════════════════╩═══════════════════════════════╣")
   console.log("   ║                   Jarnac Possibles : " +String(jarnac) +"                      ║")
@@ -175,6 +184,7 @@ function game(){
 
   // Affichage de début de jeu
   console.log("Let's begin\n")
+  file.register("Debut du jeu !")
 
   // Boucle de jeu
   while (playing){
@@ -196,9 +206,7 @@ function game(){
     else if(!jarnacCond && replace){action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter", 'remplacer', 'r']);}
     else if(jarnacCond && !replace){action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
     else{action = file.input("Action à jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);}
-    file.log("log", "Joueur " + (joueur+1) + " : " + action)
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
+    file.register("Joueur " + (joueur+1) + " : " + action)
     // Préparer le jeu en fonction de l'action
     if (action === "jouer" || action === "j"){adversaire = tour%2;jarnac = 0;}
     else if (action === "jarnac"){adversaire = (tour+1)%2;}
@@ -224,25 +232,16 @@ function game(){
     else{
       if (valid[adversaire]-1!=1){position = file.input('Ou jouer (chiffre de 1 a ' + String(valid[adversaire]-1) + ') ? ',verifs.checkValid(valid[adversaire]-1));}
     }
-    
-    file.log("log", "Joueur " + (joueur+1) + " : position : " + position)
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+    file.register("Joueur " + (joueur+1) + " : position : " + position)
     newWord = readline.question("Quel mot jouer ? ");
-    file.log("log", "Joueur " + (joueur+1) + " : mot : " + newWord)
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-  
+    file.register("Joueur " + (joueur+1) + " : mot : " + newWord)
+
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
     if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire],joueur)){ 
       console.log("Le mot n'est pas valide !");
-      file.log("log", "Joueur " + (joueur+1) + " : action non valide")
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      file.register("Joueur " + (joueur+1) + " : action non valide")
     }else if (action != "jarnac"){
-      file.log("log", "Joueur " + (joueur+1) + " : action valide")
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      file.register("Joueur " + (joueur+1) + " : action valide")
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
       drawOneLetter(carpets[adversaire], sac);
     }

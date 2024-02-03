@@ -6,7 +6,8 @@ var contenuFichier;
 
 // Lecture du dico et stockage de son contenu en var globale
 try {
-  contenuFichier = fs.readFileSync('liste_francais.txt', 'utf8');
+  let contenu = fs.readFileSync('liste_francais.txt', 'utf8').toLowerCase();
+  contenuFichier = contenu.split("\n")
   console.log("Contenu du dictionnaire bien stocké dans la variable globale");
   
 } catch (err) {
@@ -17,77 +18,65 @@ try {
 function verifs(){
 // ################ VERIF ####################
 
-  function validstr(word,joueur){
-    if (word.length>9){
-    console.log("le mot ne doit pas dépasser 9 caractères.");
-    file.log("log", "Joueur " + joueur+1 + " : le mot ne doit pas dépasser 9 caractères")
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-    return false
-    }
-    else if (word.length < 3){
-    console.log("Le mot doit être supérieur à trois caractères.");
-    file.log("log", "Joueur " + joueur+1 + " : le mot doit être supérieur à trois caractères")
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-    return false
-    }
-    return true;
-  }
-
   function anagram(word,newWord,carpet) {
   // Initialisation
-  newWord = newWord.toUpperCase()
-  word = word.toUpperCase()
-  if (word.length >= newWord.length) {
-    console.log("Il faut jouer toutes les lettres du mot présent sur la grille et en rajouter depuis le tapis")
-    file.log("log", "Le mot joué n'ajoute pas de lettres par rapport au mot déjà présent sur la grille")
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-    return false
-  }
-  // Test de la présence du mots dans la nouvelle propal
-  for (let i = 0; i < word.length; i++) {
-    if (newWord.includes(word[i])){
-    newWord = newWord.replace(word[i], '');
+    newWord = newWord.toUpperCase()
+    word = word.toUpperCase()
+    if (word.length >= newWord.length) {
+      console.log("Il faut jouer toutes les lettres du mot présent sur la grille et en rajouter depuis le tapis")
+      file.register("Le mot joué n'ajoute pas de lettres par rapport au mot déjà présent sur la grille")
+      file((error) => console.log("Erreur lors de l'écriture de log" + error))
+      return false
     }
-    else {
-    return false
+    // Test de la présence du mots dans la nouvelle propal
+    for (let i = 0; i < word.length; i++) {
+      if (newWord.includes(word[i])){
+        newWord = newWord.replace(word[i], '');
+      }
+      else {
+        return false
+      };
     };
-  };
 
-      // Test si les lettres restantes sont sur le tapis
-    for(let i=0;i<6;i++) {
-      let letter = String.fromCharCode(carpet[i] + 65);
-      if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
-    };
+        // Test si les lettres restantes sont sur le tapis
+      for(let i=0;i<6;i++) {
+        let letter = String.fromCharCode(carpet[i] + 65);
+        if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
+      };
 
-    if (newWord !== '') {return false};
-    return true
+      if (newWord !== '') {return false};
+      return true
   }
+  function validstr(word,joueur){
+    if (word.length>9){
+      console.log("le mot ne doit pas dépasser 9 caractères.");
+      file.register("Joueur " + joueur+1 + " : le mot ne doit pas dépasser 9 caractères")
+      return false}
+    else if (word.length < 3){
+      console.log("Le mot doit être supérieur à trois caractères.");
+      file.register("Joueur " + joueur+1 + " : le mot doit être supérieur à trois caractères")
+      return false}
+    return true;
+  };
   // Fonction de vérification du mot dans le dictionnaire
   function verifmotinDico(mot){
 
     if (contenuFichier.includes(mot)) {
       console.log("Le mot est bien présent dans le dictionnaire");
-      file.log("log", "Le mot est bien présent dans le dictionnaire")
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      file.register("Le mot est bien présent dans le dictionnaire")
       return true;
     }
     console.log("Le mot n'est pas présent dans le dictionnaire");
-    file.log("log", "Le mot n'est pas présent dans le dictionnaire")
-    .then(() => resolve())
-    .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-    avis = file.input("Acceptez-vous tout de meme ce mot ?(oui/non) ",["oui","non"]);
-    if (avis==="oui"){
-      file.log("log", "Le mot est tout de même accepté par le joueur")
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+    file.register("Le mot n'est pas présent dans le dictionnaire")
+
+    avis = file.input("Acceptez-vous tout de meme ce mot ?(oui/non) ",["oui","non","o","n"]);
+    if (avis==="oui" || avis==="o"){
+      file.register("Le mot est tout de même accepté par le joueur")
       return true;
     };
     return false
   };
+
   
   this.verifMot= function(word,newWord,carpet,joueur){
     verified = anagram(word,newWord,carpet) && validstr(newWord,joueur) && verifmotinDico(newWord);
@@ -120,6 +109,7 @@ function verifs(){
     }
     return true
   };
+    // Fonction de vérification du mot dans le dictionnaire
 }
 
 module.exports = new verifs;
