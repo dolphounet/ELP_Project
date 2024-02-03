@@ -6,9 +6,8 @@ var contenuFichier;
 
 // Lecture du dico et stockage de son contenu en var globale
 try {
-  let contenu = fs.readFileSync('liste_francais.txt', 'utf8');
+  let contenu = fs.readFileSync('liste_francais.txt', 'utf8').toLowerCase();
   contenuFichier = contenu.split("\n")
-  console.log(contenuFichier)
   console.log("Contenu du dictionnaire bien stocké dans la variable globale");
   
 } catch (err) {
