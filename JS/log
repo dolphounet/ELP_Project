@@ -1,14 +1,0 @@
-Debut du jeu !
-Joueur 1 : j
-Joueur 1 : position : 1
-Joueur 1 : mot : set
-Le mot n'est pas présent dans le dictionnaire
-Le mot est tout de même accepté par le joueur
-Joueur 1 : action valide
-Joueur 1 : j
-Joueur 1 : position : 2
-Joueur 1 : mot : toux
-Le mot est bien présent dans le dictionnaire
-Joueur 1 : action valide
-Joueur 1 : quitter
-
