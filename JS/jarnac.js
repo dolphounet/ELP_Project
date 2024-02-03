@@ -127,18 +127,34 @@ function affichage(grille,carpet,player){
   return valid
 }
 
-function newAffichage(grille,carpet,player){
-  let valid = 0;
-
-  // Affichage du tapis
-  console.log("Tapis du Joueur : "+String(player+1))
-  let strCarpet = "";
-  for (let i=0;i<carpet.length;i++){
-    strCarpet += " " + String.fromCharCode(carpet[i] + 65);
+function normaliseStr(string,length,separ){
+  for (let i=0;i<length-string.length;i++){
+    string += " "
   }
-  console.log(strCarpet + "\n");
+  return string + separ
+}
+
+function newAffichage(grilles,carpets,player){
+
+  // Init
+  let valid = 0;
+  let separ = "    |    ";
+  let maxlenght = 21;
+  console.log("\n--------------- Tour du joueur"+ String(player) +" ----------------\n")
+  // Affichage du tapis
+  console.log(normaliseStr("Tapis du Joueur : 1",maxlenght,separ)+"Tapis du Joueur : 2")
+
+  // Aled
+  let strCarpetA = "";
+  let strCarpetB = "";  
+  for (let i=0;i<6;i++){
+    strCarpetA += " " + String.fromCharCode(carpets[0][i] + 65);
+    strCarpetB += " " + String.fromCharCode(carpets[1] + 65);
+  }
+  console.log(normaliseStr(strCarpetA,maxlenght,separ)+strCarpetB + "\n");
+
   // Affichage de la grille
-  console.log("Grille du joueur : "+String(player+1));
+  console.log(normaliseStr("Grille du joueur : 1",maxlenght,separ)+"Grille du joueur : 2")
   for (let i=0;i<8;i++){
     if (grille[i]!=""){
       valid ++;
@@ -185,6 +201,7 @@ function game(){
     joueur = tour%2;
     console.log("Joueur " + (joueur+1));
     affichage(grilles[joueur],carpets[joueur],joueur)+1 
+    newAffichage(grilles,carpets,joueur)
 
     // Input demander l'action du tour Jarnac / jouer / arrêter
     if(jarnac <= 2 && tour != 0){action = file.input("Action a jouer ce tour (jouer/jarnac/arreter/quitter) ? ",["jouer","j","arreter","jarnac","quitter"]);}
