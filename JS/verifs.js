@@ -88,6 +88,12 @@ function verifs(){
         verified = anagram(word,newWord,carpet) && validstr(newWord) && verifmotinDico(newWord);
         return verified
     };
+
+    this.checkValid = function(valid){
+        let check=[];
+        for(let i=0;i<valid;i++){check.push(String(i+1));};
+        return check
+    };
 }
 
 module.exports = new verifs;
