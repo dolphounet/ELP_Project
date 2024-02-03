@@ -88,6 +88,7 @@ function gameEnd(grilleA, grilleB){
     game_over = true;
     console.log("points de l'équipe A:",pointsCounter(grilleA))
     console.log("points de l'équipe B:",pointsCounter(grilleB))
+    file.register("Fin du jeu")
   }
   else{
     console.log("le jeu continue")
@@ -152,7 +153,7 @@ function game(){
   let tour = 0;
   let carpets = [draw(sac, 6),draw(sac,6)];
   let grilles = [
-    ["a","b","c","d","e","f","g",""],["az","dazd","bze","zefaf","afeae","asdaafrga","afaz",""]
+    ["","","","","","","",""],["","","","","","","",""]
   ];
 
   // Variables de tour
@@ -164,6 +165,7 @@ function game(){
 
   // Affichage de début de jeu
   console.log("Let's begin\n")
+  file.register("Debut du jeu !")
 
   // Boucle de jeu
   while (playing){
@@ -175,9 +177,8 @@ function game(){
     // Input demander l'action du tour Jarnac / jouer / arrêter
     if(jarnac != 0 && tour != 0 && valid[(tour+1)%2]>1){action = file.input("Action a jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
     else{action = file.input("Action a jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);}
-    file.log("log", "Joueur " + (joueur+1) + " : " + action)
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
+    file.register("Joueur " + (joueur+1) + " : " + action)
+
     // Préparer le jeu en fonction de l'action
     if (action === "jouer" || action === "j"){adversaire = tour%2;jarnac = 0;}
     else if (action === "jarnac"){adversaire = (tour+1)%2;}
@@ -194,25 +195,16 @@ function game(){
     else{
       if (valid[adversaire]-1!=1){position = file.input('Ou jouer (chiffre de 1 a ' + String(valid[adversaire]-1) + ') ? ',verifs.checkValid(valid[adversaire]-1));}
     }
-    
-    file.log("log", "Joueur " + (joueur+1) + " : position : " + position)
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+    file.register("Joueur " + (joueur+1) + " : position : " + position)
     newWord = readline.question("Quel mot jouer ? ");
-    file.log("log", "Joueur " + (joueur+1) + " : mot : " + newWord)
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-  
+    file.register("Joueur " + (joueur+1) + " : mot : " + newWord)
+
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
     if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire],joueur)){ 
       console.log("Le mot n'est pas valide !");
-      file.log("log", "Joueur " + (joueur+1) + " : action non valide")
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      file.register("Joueur " + (joueur+1) + " : action non valide")
     }else if (action != "jarnac"){
-      file.log("log", "Joueur " + (joueur+1) + " : action valide")
-      .then(() => resolve())
-      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      file.register("Joueur " + (joueur+1) + " : action valide")
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
       drawOneCard(carpets[adversaire], sac);
     }
