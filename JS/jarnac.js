@@ -30,14 +30,13 @@ function drawOneCard(carpet, sac) {
 function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
   // Init
   newWord = newWord.toUpperCase();
-  console.log("ici hein")
+
   // Virer de la grille de l'adversaire et décaler les trucs
   grilles[adversaire][position] = "";
   for (let i = position; i < grilles[adversaire].length-1; i++) {
     if (grilles[adversaire][i+1] != ""){grilles[adversaire][i]=grilles[adversaire][i+1]}
   }
 
-  console.log("trucmuche")
   // Placer chez le joueur
   let fait = false
   for (let i=0;i<grilles[joueur].length;i++){
@@ -53,21 +52,11 @@ function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,s
       newWord = newWord.replace(word[i],'');
     }
   }
-  /*
-  for(let i=0;i<6;i++) {
-    const letter = String.fromCharCode(carpet[i] + 65).toUpperCase();
-    if (newWord.includes(letter)){
-      newWord = newWord.replace(letter,'');
-      carpet[i] = -65;
-    }
-  }
-  */
   console.log("fin jarnacfunction")
 }
 
 function placing(position,word,newWord,carpet,grille,sac){
   
-  // Remplacer
   newWord = newWord.toUpperCase();
   grille[position] = newWord;
   for (let i = 0; i < word.length; i++) {
@@ -85,8 +74,6 @@ function placing(position,word,newWord,carpet,grille,sac){
   }
 }
 
-
-
 function pointsCounter(grille){
   let points = 0;
   for(let i=0;i<8;i++) {
@@ -97,8 +84,6 @@ function pointsCounter(grille){
 
 function gameEnd(grilleA, grilleB){
   let game_over = false
-  console.log(grilleA)
-  console.log(grilleB)
   if (grilleA[7]!="" || grilleB[7]!=""){
     game_over = true;
     console.log("points de l'équipe A:",pointsCounter(grilleA))
@@ -112,28 +97,6 @@ function gameEnd(grilleA, grilleB){
 
 // ########### VISUELS ###########
 
-function affichage(grille,carpet,player){
-  let valid = 0;
-
-  // Affichage du tapis
-  console.log("Tapis du Joueur : "+String(player+1))
-  let strCarpet = "";
-  for (let i=0;i<carpet.length;i++){
-    strCarpet += " " + String.fromCharCode(carpet[i] + 65);
-  }
-  console.log(strCarpet + "\n");
-  // Affichage de la grille
-  console.log("Grille du joueur : "+String(player+1));
-  for (let i=0;i<8;i++){
-    if (grille[i]!=""){
-      valid ++;
-      console.log(String(i+1)+". : "+grille[i]);
-    }
-  }
-  console.log(String(valid+1)+". : \n");
-  return valid
-}
-
 function normaliseStr(string,length,separ){
   add = length-string.length
   for (let i=0;i<add;i++){
@@ -141,7 +104,6 @@ function normaliseStr(string,length,separ){
   }
   return string + separ
 }
-
 
 function newAffichage(grilles,carpets,player,jarnac){
 
@@ -161,7 +123,7 @@ function newAffichage(grilles,carpets,player,jarnac){
     if (j!= 7){strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext) + "\n"}
     else {strGrille +=  normaliseStr(begin + "   " + String(j+1) + ". : " + grilles[0][j],maxlenght,separ) + normaliseStr("   " + String(j+1) + ". : " + grilles[1][j],maxlenght-2,ext)}
   }
-  console.log("   ╔═════════════════════════════════════════════════════════════╗")
+  console.log("\n   ╔═════════════════════════════════════════════════════════════╗")
   console.log("   ║                      Tour du joueur "+String(player+1)+"                       ║")
   console.log("   ╠═════════════════════════════╦═══════════════════════════════╣")
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
@@ -190,11 +152,11 @@ function game(){
   let tour = 0;
   let carpets = [draw(sac, 6),draw(sac,6)];
   let grilles = [
-    ["","","","","","","",""],["","","","","","","",""]
+    ["a","b","c","d","e","f","g",""],["az","dazd","bze","zefaf","afeae","asdaafrga","afaz",""]
   ];
 
   // Variables de tour
-  let joueur = 0;// Au début du tour
+  let joueur = 0;
   let adversaire = 1;
   let valid = [];
   let playing = true;
@@ -211,15 +173,15 @@ function game(){
     valid = newAffichage(grilles,carpets,joueur,jarnac)
 
     // Input demander l'action du tour Jarnac / jouer / arrêter
-    if(jarnac <= 2 && tour != 0 && valid[(tour+1)%2]>1){action = file.input("Action a jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
+    if(jarnac != 0 && tour != 0 && valid[(tour+1)%2]>1){action = file.input("Action a jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
     else{action = file.input("Action a jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);}
     file.log("log", "Joueur " + (joueur+1) + " : " + action)
       .then(() => resolve())
       .catch((error) => console.log("Erreur lors de l'écriture de log : " + error))
     // Préparer le jeu en fonction de l'action
-    if (action === "jouer" || action === "j"){adversaire = tour%2; jarnac=2;}
-    else if (action === "jarnac"){adversaire = (tour+1)%2; jarnac++;}
-    else if (action === "passer" || action === "p"){jarnac = 0;tour ++;continue;}
+    if (action === "jouer" || action === "j"){adversaire = tour%2;jarnac = 0;}
+    else if (action === "jarnac"){adversaire = (tour+1)%2;}
+    else if (action === "passer" || action === "p"){jarnac = 2;tour ++;continue;}
     else if (action === "quitter"){playing=false;console.log("Fermeture du jeu...");continue;}
     else {console.log("L'action n'existe pas.");continue;}
     
@@ -227,10 +189,10 @@ function game(){
     let position = 1
 
     if(action != "jarnac"){
-      if (valid[adversaire]!=1){position = file.input('Ou jouer (chiffre de 1 a ' + valid[adversaire] + ') ? ',verifs.checkValid(valid[adversaire]));}
+      if (valid[adversaire]!=1){position = file.input('Ou jouer (chiffre de 1 a ' + String(valid[adversaire]) + ') ? ',verifs.checkValid(valid[adversaire]));}
     }
     else{
-      if (valid[adversaire]-1!=1){position = file.input('Ou jouer (chiffre de 1 a ' + valid[adversaire] + ') ? ',verifs.checkValid(valid[adversaire]));}
+      if (valid[adversaire]-1!=1){position = file.input('Ou jouer (chiffre de 1 a ' + String(valid[adversaire]-1) + ') ? ',verifs.checkValid(valid[adversaire]-1));}
     }
     
     file.log("log", "Joueur " + (joueur+1) + " : position : " + position)
@@ -242,7 +204,7 @@ function game(){
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
   
     // Verifier que l'input est valide (Longueur + rapport au mot + carpet)
-    if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire])){ 
+    if (!verifs.verifMot(grilles[adversaire][position-1],newWord, carpets[adversaire],joueur)){ 
       console.log("Le mot n'est pas valide !");
       file.log("log", "Joueur " + (joueur+1) + " : action non valide")
       .then(() => resolve())
@@ -253,11 +215,10 @@ function game(){
       .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
       drawOneCard(carpets[adversaire], sac);
-      
     }
     else{
-      
-      jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac); // Placer le nouveau mot, déduire du tapis les lettres utilisées
+      jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac);
+      jarnac --;
     }
   
     if (gameEnd(grilles[0],grilles[1])){

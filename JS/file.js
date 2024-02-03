@@ -8,7 +8,7 @@ function file(){
     async function fileInit(file) {
         try {
         await writeFile(file, "");
-        console.log("c'est bongue");
+        console.log("Fichier prêt !");
         } catch (error) {
         console.log("Erreur lors de l'initialisation du fichier :", error.message);
         }

@@ -17,7 +17,7 @@ try {
 function verifs(){
 // ################ VERIF ####################
 
-    function validstr(word){
+    function validstr(word,joueur){
         if (word.length>9){
         console.log("le mot ne doit pas dépasser 9 caractères.");
         file.log("log", "Joueur " + joueur+1 + " : le mot ne doit pas dépasser 9 caractères")
@@ -56,14 +56,14 @@ function verifs(){
         };
     };
 
-    // Test si les lettres restantes sont sur le tapis
-    for(let i=0;i<6;i++) {
-        let letter = String.fromCharCode(carpet[i] + 65);
-        if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
-    };
+        // Test si les lettres restantes sont sur le tapis
+        for(let i=0;i<6;i++) {
+            let letter = String.fromCharCode(carpet[i] + 65);
+            if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
+        };
 
-    if (newWord !== '') {return false};
-    return true
+        if (newWord !== '') {return false};
+        return true
     }
 
     // Fonction de vérification du mot dans le dictionnaire
@@ -80,7 +80,7 @@ function verifs(){
         file.log("log", "Le mot n'est pas présent dans le dictionnaire")
         .then(() => resolve())
         .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
-        avis = file.input("Acceptez-vous tout de meme ce mot ?(oui/non)",["oui","non"]);
+        avis = file.input("Acceptez-vous tout de meme ce mot ?(oui/non) ",["oui","non"]);
         if (avis==="oui"){
           file.log("log", "Le mot est tout de même accepté par le joueur")
           .then(() => resolve())
@@ -90,8 +90,8 @@ function verifs(){
         return false
     };
     
-    this.verifMot= function(word,newWord,carpet){
-        verified = anagram(word,newWord,carpet) && validstr(newWord) && verifmotinDico(newWord);
+    this.verifMot= function(word,newWord,carpet,joueur){
+        verified = anagram(word,newWord,carpet) && validstr(newWord,joueur) && verifmotinDico(newWord);
         return verified
     };
 
