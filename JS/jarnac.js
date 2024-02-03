@@ -136,7 +136,7 @@ function normaliseStr(string,length,separ){
 }
 
 
-function newAffichage(grilles,carpets,player){
+function newAffichage(grilles,carpets,player,jarnac){
 
   // Init
   let maxlenght = 28;
@@ -168,7 +168,9 @@ function newAffichage(grilles,carpets,player){
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
   console.log(normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext));
   console.log(normaliseStr(begin + "",maxlenght,separ)+normaliseStr("",maxlenght-2,ext))
-  console.log("   ╚═════════════════════════════╩═══════════════════════════════╝\n")
+  console.log("   ╠═════════════════════════════╩═══════════════════════════════╣")
+  console.log("   ║                   Jarnac Possibles : " +String(jarnac) +"                      ║")
+  console.log("   ╚═════════════════════════════════════════════════════════════╝\n")
 
   return valid
 }
@@ -199,10 +201,10 @@ function game(){
     
     // Variable du joueur
     joueur = tour%2;
-    valid = newAffichage(grilles,carpets,joueur)
+    valid = newAffichage(grilles,carpets,joueur,jarnac)
 
     // Input demander l'action du tour Jarnac / jouer / arrêter
-    if(jarnac <= 2 && tour != 0){action = file.input("Action a jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
+    if(jarnac <= 2 && tour != 0 && valid[(tour+1)%2]>1){action = file.input("Action a jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);}
     else{action = file.input("Action a jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);}
     file.log("log", "Joueur " + (joueur+1) + " : " + action)
       .then(() => resolve())
