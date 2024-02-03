@@ -39,7 +39,13 @@ function verifs(){
     // Initialisation
     newWord = newWord.toUpperCase()
     word = word.toUpperCase()
-
+    if (word.length >= newWord.length) {
+      console.log("Il faut jouer toutes les lettres du mot présent sur la grille et en rajouter depuis le tapis")
+      file.log("log", "Le mot joué n'ajoute pas de lettres par rapport au mot déjà présent sur la grille")
+      .then(() => resolve())
+      .catch((error) => console.log("Erreur lors de l'écriture de log" + error))
+      return false
+    }
     // Test de la présence du mots dans la nouvelle propal
     for (let i = 0; i < word.length; i++) {
         if (newWord.includes(word[i])){
