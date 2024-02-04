@@ -179,7 +179,7 @@ function game(){
       playing=false;console.log("Fermeture du jeu...");
       continue;
     }
-    else if (action === "remplacer"){
+    else if (action === "remplacer" || action === "r"){
       replace = 0;
       letters = readline.question("Quelles lettres remplacer (lettres du tapis séparées par un espace) ? ");
       while (!verifs.validLetters(letters, carpets[joueur])){
