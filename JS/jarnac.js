@@ -181,6 +181,7 @@ function game(){
     }
     else if (action === "remplacer" || action === "r"){
       replace = 0;
+      jarnac = 0;
       letters = readline.question("Quelles lettres remplacer (lettres du tapis séparées par un espace) ? ");
       while (!verifs.validLetters(letters, carpets[joueur])){
         letters = readline.question("Les lettres ne sont pas dans le tapis ou il n'y en a pas 3. (lettres du tapis séparées par un espace) ");
