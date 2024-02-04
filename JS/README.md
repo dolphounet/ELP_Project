@@ -1,21 +1,19 @@
-# Jarnac - LEVEQUE, POISSE-JOUBERT, VATAN
+# Jarnac - LEVEQUE, POISSE-JOUBERT, VATAN
 
 ## Installation
+npm install package.json ou npm install readline-sync
 
-- npm install package.json ou npm install readline-sync
+### Le jeu
 
+Ce jeu se base sur le jeu JARNAC et suis les règles décrites ici : https://github.com/sfrenot/javascript/blob/2dc88c42dc77c3494afea61f1a895064e91d91ef/projet2/RegleJarnac.pdf<br>
 
-## JEU
-
-Ce jeu se base sur le jeu JARNAC et suis les règles décrites ici : https://github.com/sfrenot/javascript/blob/2dc88c42dc77c3494afea61f1a895064e91d91ef/projet2/RegleJarnac.pdf
-
-### Comment jouer (en connaissant les règles du jeu originel)
+### Comment jouer (en connaissant les règles du jeu originel)
 
 Au début de votre tour, si vous ne commencez pas la partie, vous pouvez décider de placer un mot, passer votre tour, lancer un jarnac immédiatement après le tour de l'adversaire, quitter le jeu ou bien quitter pour arrêter la partie.
 
 #### Jouer
 
-<br>NB : Cette action vous empêchera de faire un ou plusieurs jarnac durant votre tour<br>
+NB : Cette action vous empêchera de faire un ou plusieurs jarnac durant votre tour<br>
 
 Lorsque vous faites jouer, si vous avez au moins une ligne remplie, il vous sera demandé de choisir sur quelle ligne vous voulez jouer (Si vous n'avez aucun mot sur votre grille, le jeu vous placera automatiquement sur la 1ère colonne).<br>
 Il sera alors demandé de donner le mot et s'il est valide selon les critères du jeu et dans le dictionnaire fournis, il sera placé (Dans l'éventualité ou le mot est valide selon le jeu mais non présent dans le dictionnaire, les joueurs peuvent choisir s'ils souhaitent accepter le mot ou non)<br>
