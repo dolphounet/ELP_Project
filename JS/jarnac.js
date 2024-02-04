@@ -138,8 +138,7 @@ function game(){
   let valid = [];
   let playing = true;
   let jarnac = 0;
-  let replace = 1;
-  let drawNextTurn = [false, false];
+  let newTurn = [false, false];
 
   // Affichage de début de jeu
   console.log("Début du jeu !\n")
@@ -154,27 +153,19 @@ function game(){
     
     // Variable du joueur
     joueur = tour%2;
-    if (tour != 0 && tour != 1) {
-      if (drawNextTurn[joueur]) {
-        if (!sacVide(sac)){
-          carpets[joueur].push(draw(sac, 1)[0]);
-          drawNextTurn[joueur] = false;
-        }
-      }
-    }
-
+    
     carpets = removeSpaces(carpets);
     valid = visuels.Affichage(grilles,carpets,joueur,jarnac)
     jarnacCond = jarnac !== 0 && tour !== 0 && valid[(tour+1)%2]>1;
-    replaceCond = replace === 1 && carpets[joueur].length >= 3;
-
-    if(jarnacCond && replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q", 'remplacer', 'r']);
+    newTurn[joueur] = newTurn[joueur] && !sacVide(sac);
+    
+    if (newTurn[joueur] && sac.reduce((a, b) => a + b, 0) < 3) {
+      action = "piocher";
     }
-    else if(!jarnacCond && replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter","q", 'remplacer', 'r']);
+    else if (newTurn[joueur] && sac.reduce((a, b) => a + b, 0) >= 3) {
+      action = file.input("Action à jouer en début de tour (piocher/remplacer) ? ", ["piocher", "remplacer", "r"]);
     }
-    else if(jarnacCond && !replaceCond){
+    else if(jarnacCond){
       action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q"]);
     }
     else{
@@ -191,9 +182,8 @@ function game(){
       adversaire = (tour+1)%2;
     }
     else if (action === "passer" || action === "p"){jarnac = 2;
-      replace = 1;
       tour ++;
-      drawNextTurn[joueur] = true;
+      newTurn[joueur] = true;
       continue;
     }
     else if (action === "quitter" || action === "q"){
@@ -201,7 +191,7 @@ function game(){
       continue;
     }
     else if (action === "remplacer" || action === "r"){
-      replace = 0;
+      newTurn[joueur] = false;
       jarnac = 0;
       letters = readline.question("Quelles lettres remplacer (lettres du tapis séparées par un espace) ? ");
       while (!verifs.validLetters(letters, carpets[joueur])){
@@ -209,6 +199,11 @@ function game(){
       }
       replaceCarpet(letters, carpets[joueur], sac);
       file.register("Joueur " + (joueur+1) + " a remplacé les lettres " + letters.toUpperCase() + " de son tapis");
+      continue;
+    }
+    else if (action === "piocher"){
+      carpets[joueur].push(draw(sac, 1)[0]);
+      newTurn[joueur] = false;
       continue;
     }
     else {console.log("L'action n'existe pas.");continue;}
