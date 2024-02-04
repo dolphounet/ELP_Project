@@ -9,7 +9,7 @@ Ce jeu se base sur le jeu JARNAC et suis les règles décrites ici : https://git
 
 ### Comment jouer (en connaissant les règles du jeu originel)
 
-Au début de votre tour, si vous ne commencez pas la partie, vous pouvez décider de piocher une nouvelle lettre ou de remplacer trois lettres de votre tapis. Ensuite, vous pourrez placer un mot, passer votre tour, lancer un jarnac immédiatement après le tour de l'adversaire, quitter le jeu ou bien quitter pour arrêter la partie.
+Au début de votre tour, si vous ne commencez pas la partie, vous pouvez décider de piocher une nouvelle lettre ou de remplacer trois lettres de votre tapis. Ensuite, vous pourrez placer un mot, passer votre tour, lancer un jarnac immédiatement après le tour de l'adversaire, quitter le jeu pour arrêter la partie.
 
 #### Piocher
 
