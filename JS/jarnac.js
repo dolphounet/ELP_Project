@@ -159,11 +159,11 @@ function game(){
     jarnacCond = jarnac !== 0 && tour !== 0 && valid[(tour+1)%2]>1;
     newTurn[joueur] = newTurn[joueur] && !sacVide(sac);
     
-    if (newTurn[joueur] && sac.reduce((a, b) => a + b, 0) < 3) {
+    if (newTurn[joueur] && (sac.reduce((a, b) => a + b, 0) < 3 || carpets[joueur].length < 3)) {
       action = "piocher";
     }
     else if (newTurn[joueur] && sac.reduce((a, b) => a + b, 0) >= 3) {
-      action = file.input("Action à jouer en début de tour (piocher/remplacer) ? ", ["piocher", "remplacer", "r"]);
+      action = file.input("Action à jouer en début de tour (piocher/remplacer) ? ", ["piocher", "remplacer", "r","pi"]);
     }
     else if(jarnacCond){
       action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q"]);
@@ -201,7 +201,7 @@ function game(){
       file.register("Joueur " + (joueur+1) + " a remplacé les lettres " + letters.toUpperCase() + " de son tapis");
       continue;
     }
-    else if (action === "piocher"){
+    else if (action === "piocher" || action === "pi"){
       carpets[joueur].push(draw(sac, 1)[0]);
       newTurn[joueur] = false;
       continue;
