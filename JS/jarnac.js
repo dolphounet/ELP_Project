@@ -19,14 +19,6 @@ function draw(sac, n) {
   return letters
 }
 
-function drawOneLetter(carpet, sac) {
-  let i = 0;
-  while (carpet[i]!=32-65) {
-    i++;
-  };
-  carpet[i] = draw(sac, 1)[0];
-}
-
 function replaceCarpet(letters, carpet, sac) {
   letters = letters.replaceAll(" ", "").toUpperCase();
   for (let i = 0; i < carpet.length; i++) {
@@ -134,6 +126,7 @@ function game(){
   let playing = true;
   let jarnac = 0;
   let replace = 1;
+  let drawNextTurn = [false, false];
 
   // Affichage de début de jeu
   console.log("Début du jeu !\n")
@@ -144,13 +137,9 @@ function game(){
     
     // Variable du joueur
     joueur = tour%2;
-    if (tour != 0 && tour != 1) {
-      if (carpets[joueur].includes(32-65)) {
-        drawOneLetter(carpets[joueur], sac);
-      }
-      else{
-        carpets[joueur].push(draw(sac, 1)[0]);
-      }
+    if (drawNextTurn[joueur]) {
+      carpets[joueur].push(draw(sac, 1)[0]);
+      drawNextTurn[joueur] = false;
     }
 
     carpets = removeSpaces(carpets);
@@ -183,6 +172,7 @@ function game(){
     else if (action === "passer" || action === "p"){jarnac = 2;
       replace = 1;
       tour ++;
+      drawNextTurn[joueur] = true;
       continue;
     }
     else if (action === "quitter"){
@@ -223,7 +213,7 @@ function game(){
     }else if (action != "jarnac"){
       file.register("Joueur " + (joueur+1) + " : action valide")
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
-      drawOneLetter(carpets[adversaire], sac);
+      carpets[adversaire].push(draw(sac, 1)[0]);
     }
     else{
       jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac);
