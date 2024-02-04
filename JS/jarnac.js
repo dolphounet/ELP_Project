@@ -44,9 +44,8 @@ function removeSpaces(carpets) {
 
 
 function jarnacFunction(position,word,newWord,joueur,adversaire,carpet,grilles,sac){
-  // Init
-  newWord = newWord.toUpperCase();
 
+  newWord = newWord.toUpperCase();
   grilles[adversaire][position] = "";
   for (let i = position; i < grilles[adversaire].length-1; i++) {
     if (grilles[adversaire][i+1] != ""){grilles[adversaire][i]=grilles[adversaire][i+1]}
@@ -106,9 +105,10 @@ function gameEnd(grilleA, grilleB){
   let game_over = false
   if (grilleA[7]!="" || grilleB[7]!=""){
     game_over = true;
-    console.log("points de l'équipe A:",pointsCounter(grilleA))
-    console.log("points de l'équipe B:",pointsCounter(grilleB))
-    file.register("Fin du jeu")
+    console.log("La partie est terminée !");
+    console.log("points du joueur 1 : ",pointsCounter(grilleA));
+    console.log("points du joueur 2 : ",pointsCounter(grilleB));
+    file.register("Fin du jeu");
   }
   else{
     console.log("le jeu continue")
@@ -122,9 +122,9 @@ function game(){
   // Creation des objets de jeu
   let sac = [14, 4, 7, 5, 19, 2, 4, 2, 11, 1, 1, 6, 5, 9, 8, 4, 1, 10, 7, 9, 8, 2, 1, 1, 1, 2];
   let tour = 0;
-  let carpets = [draw(sac,2),draw(sac,7)];
+  let carpets = [draw(sac,6),draw(sac,6)];
   let grilles = [
-    ["","","","","","","",""],["","","","","","","",""]
+    ["","","","","","","",""],["a","b","c","d","e","f","g",""]
   ];
 
   // Variables de tour
@@ -136,7 +136,7 @@ function game(){
   let replace = 1;
 
   // Affichage de début de jeu
-  console.log("Let's begin\n")
+  console.log("Début du jeu !\n")
   file.register("Debut du jeu !")
 
   // Boucle de jeu
@@ -227,6 +227,7 @@ function game(){
     }
     else{
       jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac);
+      file.register("Joueur " + (joueur+1) + " : jarnac valide")
       jarnac --;
     }
   
