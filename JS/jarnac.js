@@ -16,6 +16,7 @@ function draw(sac, n) {
     letters.push(nb_aleat);
     sac[nb_aleat] -= 1;
   };
+  console.log("Vous avez pioché : " + letters.map(letter => String.fromCharCode(letter + 65).toUpperCase()))
   return letters
 }
 
@@ -228,6 +229,7 @@ function game(){
   }
 }
 
+var strEnd = ""
 game();
 
 
