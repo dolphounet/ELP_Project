@@ -16,15 +16,8 @@ function draw(sac, n) {
     letters.push(nb_aleat);
     sac[nb_aleat] -= 1;
   };
+  console.log("Vous avez pioché : " + letters.map(letter => String.fromCharCode(letter + 65).toUpperCase()))
   return letters
-}
-
-function drawOneLetter(carpet, sac) {
-  let i = 0;
-  while (carpet[i]!=32-65) {
-    i++;
-  };
-  carpet[i] = draw(sac, 1)[0];
 }
 
 function replaceCarpet(letters, carpet, sac) {
@@ -145,6 +138,7 @@ function game(){
   let playing = true;
   let jarnac = 0;
   let replace = 1;
+  let drawNextTurn = [false, false];
 
   // Affichage de début de jeu
   console.log("Début du jeu !\n")
@@ -160,11 +154,11 @@ function game(){
     // Variable du joueur
     joueur = tour%2;
     if (tour != 0 && tour != 1) {
-      if (carpets[joueur].includes(32-65) && !sacVide(sac)) {
-        drawOneLetter(carpets[joueur], sac);
-      }
-      else if (!sacVide(sac)){
-        carpets[joueur].push(draw(sac, 1)[0]);
+      if (drawNextTurn[joueur]) {
+        if (!sacVide(sac)){
+          carpets[joueur].push(draw(sac, 1)[0]);
+          drawNextTurn[joueur] = false;
+        }
       }
     }
 
@@ -174,16 +168,16 @@ function game(){
     replaceCond = replace === 1 && carpets[joueur].length >= 3;
 
     if(jarnacCond && replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter", 'remplacer', 'r']);
+      action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q", 'remplacer', 'r']);
     }
     else if(!jarnacCond && replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter", 'remplacer', 'r']);
+      action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter","q", 'remplacer', 'r']);
     }
     else if(jarnacCond && !replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);
+      action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q"]);
     }
     else{
-      action = file.input("Action à jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);
+      action = file.input("Action à jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter","q"]);
     }
 
     file.register("Joueur " + (joueur+1) + " : " + action)
@@ -198,14 +192,16 @@ function game(){
     else if (action === "passer" || action === "p"){jarnac = 2;
       replace = 1;
       tour ++;
+      drawNextTurn[joueur] = true;
       continue;
     }
-    else if (action === "quitter"){
+    else if (action === "quitter" || action === "q"){
       playing=false;console.log("Fermeture du jeu...");
       continue;
     }
-    else if (action === "remplacer"){
+    else if (action === "remplacer" || action === "r"){
       replace = 0;
+      jarnac = 0;
       letters = readline.question("Quelles lettres remplacer (lettres du tapis séparées par un espace) ? ");
       while (!verifs.validLetters(letters, carpets[joueur])){
         letters = readline.question("Les lettres ne sont pas dans le tapis ou il n'y en a pas 3. (lettres du tapis séparées par un espace) ");
@@ -239,7 +235,7 @@ function game(){
       file.register("Joueur " + (joueur+1) + " : action valide")
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
       if (!sacVide(sac)){
-        drawOneLetter(carpets[adversaire], sac);
+        carpets[adversaire].push(draw(sac, 1)[0]);
       }
     }
     else{
@@ -254,6 +250,7 @@ function game(){
   }
 }
 
+var strEnd = ""
 game();
 
 
