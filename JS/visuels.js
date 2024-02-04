@@ -2,6 +2,7 @@ function visuels(){
     // ########### VISUELS ###########
 
     function normaliseStr(string,length,separ){
+        // Mets la string donnée à la bonne longueur
         add = length-string.length
         for (let i=0;i<add;i++){
         string += " "
@@ -11,7 +12,6 @@ function visuels(){
   
     this.Affichage = function(grilles,carpets,player,jarnac){
 
-        // Init
         let maxlenght = 28;
         let begin = "   ║    "
         let ext = "║   "
@@ -21,12 +21,8 @@ function visuels(){
         let strGrilles = "";
         let strCarpets = "";
 
-        // CREATION UNE LIGNE
-        // strCarpet[i] += "  " + String.fromCharCode(carpets[i][j] + 65);
-        // normaliseStr(begin + strCarpet[0],maxlenght,separ)+normaliseStr(strCarpet[1],maxlenght-2,ext)
-
         for (let i=0;i<2;i++){
-            // Init
+
             let sixaines = Math.floor(carpets[i].length/6);
 
             for(let j=0;j<sixaines;j++){

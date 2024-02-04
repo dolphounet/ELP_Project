@@ -1,10 +1,7 @@
 const fs = require('fs');
 var file = require('./file');
 
-// Déclaration de la variable globale pour stocker dico
 var contenuFichier;
-
-// Lecture du dico et stockage de son contenu en var globale
 try {
   let contenu = fs.readFileSync('liste_francais.txt', 'utf8').toLowerCase();
   contenuFichier = contenu.split("\n")
@@ -19,7 +16,7 @@ function verifs(){
 // ################ VERIF ####################
 
   function anagram(word,newWord,carpet) {
-  // Initialisation
+    // Teste si le nouveau mot est composé du mot actuel et du tapis
     newWord = newWord.toUpperCase()
     word = word.toUpperCase()
     if (word.length >= newWord.length) {
@@ -27,7 +24,7 @@ function verifs(){
       file.register("Le mot joué n'ajoute pas de lettres par rapport au mot déjà présent sur la grille")
       return false
     }
-    // Test de la présence du mots dans la nouvelle propal
+
     for (let i = 0; i < word.length; i++) {
       if (newWord.includes(word[i])){
         newWord = newWord.replace(word[i], '');
@@ -37,16 +34,17 @@ function verifs(){
       };
     };
 
-        // Test si les lettres restantes sont sur le tapis
-      for(let i=0;i<carpet.length;i++) {
-        let letter = String.fromCharCode(carpet[i] + 65);
-        if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
-      };
+    for(let i=0;i<carpet.length;i++) {
+      let letter = String.fromCharCode(carpet[i] + 65);
+      if (newWord.includes(letter)) {newWord = newWord.replace(letter,'')}
+    };
 
-      if (newWord !== '') {return false};
-      return true
+    if (newWord !== '') {return false};
+    return true
   }
+
   function validstr(word,joueur){
+    // Verifie si le mot à la bonne longueur
     if (word.length>9){
       console.log("le mot ne doit pas dépasser 9 caractères.");
       file.register("Joueur " + joueur+1 + " : le mot ne doit pas dépasser 9 caractères")
@@ -57,9 +55,9 @@ function verifs(){
       return false}
     return true;
   };
-  // Fonction de vérification du mot dans le dictionnaire
-  function verifmotinDico(mot){
 
+  function verifmotinDico(mot){
+    // Fonction de vérification du mot dans le dictionnaire
     if (contenuFichier.includes(mot)) {
       console.log("Le mot est bien présent dans le dictionnaire");
       file.register("Le mot est bien présent dans le dictionnaire")
@@ -78,6 +76,7 @@ function verifs(){
 
   
   this.verifMot= function(word,newWord,carpet,joueur){
+    // Verifie que le mot est jouable
     verified = anagram(word,newWord,carpet) && validstr(newWord,joueur) && verifmotinDico(newWord);
     return verified
   };
@@ -108,7 +107,6 @@ function verifs(){
     }
     return true
   };
-    // Fonction de vérification du mot dans le dictionnaire
 }
 
 module.exports = new verifs;
