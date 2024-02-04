@@ -101,6 +101,17 @@ function pointsCounter(grille){
   return points
 }
 
+function sacVide(sac){
+  let sac_vide = true
+  for (let i=0;i<sac.length;i++){
+    if (sac[i]!=0){
+      sac_vide = false 
+
+    }
+  }  
+  
+  return sac_vide 
+}
 function gameEnd(grilleA, grilleB){
   let game_over = false
   if (grilleA[7]!="" || grilleB[7]!=""){
@@ -124,7 +135,7 @@ function game(){
   let tour = 0;
   let carpets = [draw(sac,6),draw(sac,6)];
   let grilles = [
-    ["","","","","","","",""],["a","b","c","d","e","f","g",""]
+    ["","","","","","","",""],["","","","","","","",""]
   ];
 
   // Variables de tour
@@ -142,13 +153,17 @@ function game(){
   // Boucle de jeu
   while (playing){
     
+    if (sacVide(sac)){
+      console.log("il n'y a plus de lettres dans le sac")
+    }
+    
     // Variable du joueur
     joueur = tour%2;
     if (tour != 0 && tour != 1) {
-      if (carpets[joueur].includes(32-65)) {
+      if (carpets[joueur].includes(32-65) && !sacVide(sac)) {
         drawOneLetter(carpets[joueur], sac);
       }
-      else{
+      else if (!sacVide(sac)){
         carpets[joueur].push(draw(sac, 1)[0]);
       }
     }
@@ -172,7 +187,7 @@ function game(){
     }
 
     file.register("Joueur " + (joueur+1) + " : " + action)
-
+    
     if (action === "jouer" || action === "j"){
       adversaire = tour%2;
       jarnac = 0;
@@ -223,14 +238,16 @@ function game(){
     }else if (action != "jarnac"){
       file.register("Joueur " + (joueur+1) + " : action valide")
       placing(position-1,grilles[adversaire][position-1],newWord,carpets[adversaire],grilles[joueur],sac);
-      drawOneLetter(carpets[adversaire], sac);
+      if (!sacVide(sac)){
+        drawOneLetter(carpets[adversaire], sac);
+      }
     }
     else{
       jarnacFunction(position-1,grilles[adversaire][position-1],newWord,joueur,adversaire,carpets[adversaire],grilles,sac);
       file.register("Joueur " + (joueur+1) + " : jarnac valide")
       jarnac --;
     }
-  
+
     if (gameEnd(grilles[0],grilles[1])){
       playing = false;
     }
