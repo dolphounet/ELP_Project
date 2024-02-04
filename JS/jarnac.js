@@ -25,6 +25,7 @@ function replaceCarpet(letters, carpet, sac) {
   for (let i = 0; i < carpet.length; i++) {
     if (letters.includes(String.fromCharCode(carpet[i]+65))){
       letters.replace(String.fromCharCode(carpet[i]+65), "");
+      sac[carpet[i]] += 1;
       carpet[i] = draw(sac, 1)[0];
     }
   }
