@@ -24,7 +24,7 @@ function replaceCarpet(letters, carpet, sac) {
   letters = letters.replaceAll(" ", "").toUpperCase();
   for (let i = 0; i < carpet.length; i++) {
     if (letters.includes(String.fromCharCode(carpet[i]+65))){
-      letters.replace(String.fromCharCode(carpet[i]+65), "");
+      letters = letters.replace(String.fromCharCode(carpet[i]+65), "");
       sac[carpet[i]] += 1;
       carpet[i] = draw(sac, 1)[0];
     }
@@ -149,7 +149,7 @@ function game(){
   while (playing){
     
     if (sacVide(sac)){
-      console.log("il n'y a plus de lettres dans le sac")
+      console.log("Il n'y a plus de lettres dans le sac");
     }
     
     // Variable du joueur
