@@ -116,7 +116,7 @@ function game(){
   let tour = 0;
   let carpets = [draw(sac,6),draw(sac,6)];
   let grilles = [
-    ["","","","","","","",""],["a","b","c","d","e","f","g",""]
+    ["","","","","","","",""],["","","","","","","",""]
   ];
 
   // Variables de tour
@@ -148,16 +148,16 @@ function game(){
     replaceCond = replace === 1 && carpets[joueur].length >= 3;
 
     if(jarnacCond && replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter", 'remplacer', 'r']);
+      action = file.input("Action à jouer ce tour (jouer/jarnac/remplacer/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q", 'remplacer', 'r']);
     }
     else if(!jarnacCond && replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter", 'remplacer', 'r']);
+      action = file.input("Action à jouer ce tour (jouer/remplacer/passer/quitter) ? ",["jouer","j","passer","p","quitter","q", 'remplacer', 'r']);
     }
     else if(jarnacCond && !replaceCond){
-      action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter"]);
+      action = file.input("Action à jouer ce tour (jouer/jarnac/passer/quitter) ? ",["jouer","j","passer","p","jarnac","quitter","q"]);
     }
     else{
-      action = file.input("Action à jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter"]);
+      action = file.input("Action à jouer ce tour (jouer/passer/quitter) ? ",["jouer","j","passer","p","quitter","q"]);
     }
 
     file.register("Joueur " + (joueur+1) + " : " + action)
@@ -175,7 +175,7 @@ function game(){
       drawNextTurn[joueur] = true;
       continue;
     }
-    else if (action === "quitter"){
+    else if (action === "quitter" || action === "q"){
       playing=false;console.log("Fermeture du jeu...");
       continue;
     }
